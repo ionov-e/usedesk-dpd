@@ -15,8 +15,6 @@ exit();
  * Выполнение преднастроек скрипта
  *
  * @return void
- *
- * @throws ErrorException
  */
 function preConfig(): void
 {
