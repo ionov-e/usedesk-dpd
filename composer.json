@@ -1,6 +1,7 @@
 {
   "require": {
     "ext-json": "*",
-    "ext-soap": "*"
+    "ext-soap": "*",
+    "vlucas/phpdotenv": "*"
   }
 }
