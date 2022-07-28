@@ -2,31 +2,19 @@
 
 include_once "../common.php";
 
-preConfig();
 main();
-exit();
-
 
 // ---------------------------------------------- Функции
-/**
- * Выполнение преднастроек
- *
- * @return void
- */
-function preConfig(): void
-{
-    header("Content-Type: application/json");
-
-    // Отмечаем в логе начало работы
-    logMsg(str_repeat("-", 20) . ' Ответ UseDesk блоку ' . str_repeat("-", 20));
-}
-
 /**
  * Главная функция
  *
  * @return void
  */
-function main() {
+function main()
+{
+    header("Content-Type: application/json");
+    // Отмечаем в логе начало работы
+    logMsg(str_repeat("-", 20) . ' Ответ UseDesk блоку ' . str_repeat("-", 20));
     try {
         $postTicketId = getTicketId();
         $htmlString = getHtmlString($postTicketId);
@@ -36,7 +24,7 @@ function main() {
     }
 
     echo json_encode(array('html' => $htmlString)); // Вывод web-блока UseDesk
-
+    exit();
 }
 
 /**
@@ -78,9 +66,10 @@ function getTicketId(): int
  *
  * @return string
  */
-function getHtmlString(string $postTicketId): string {
+function getHtmlString(string $postTicketId): string  #TODO в отдельный файл
+{
     $domain = URL_SCRIPT_DOMAIN;
     $parameterName = TICKET_ID_KEY_NAME;
-    return "<form><button class='btn btn-green' formaction='$domain/usedesk_create_order.php?$parameterName=$postTicketId'>Оформить ТТН</button></form>";
+    return "<form><button class='btn btn-green' formaction='$domain/usedesk_create_order.php?$parameterName=$postTicketId'>Оформить ТТН</button></form>"; #TODO <a>
 
 }

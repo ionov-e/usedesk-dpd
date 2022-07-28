@@ -41,7 +41,7 @@ $form['houseKorpus'] = '5';
 //$form['office'] = '';
 //$form['flat'] = '';
 
-$client = new SoapClient (URL_ORDER);
+
 
 $arData = array();
 
@@ -135,11 +135,17 @@ if (isset($form['flat'])) {
 
 $arRequest['orders'] = $arData; // помещаем запрос в orders
 
+$client = new SoapClient (URL_ORDER); #TODO try catch?
 $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD
 
-$responseArray = stdToArray($responseStd); //функция из объекта в массив
 
-if ($responseArray['return']['errorMessage'][0] == '') {
+$return = $responseStd['return'];
+
+$responseArray = stdToArray($responseStd); //функция из объекта в массив #TODO избавиться
+//$responseArray = $responseStd;
+
+
+if ($responseArray['return']['errorMessage'][0] == '') { #TODO Status использовать
     logMsg("Тикет $ticketId: Успешно создали заказ в DPD. Ответ: " . json_encode($responseArray, JSON_UNESCAPED_UNICODE));
     echo "Успешно создано! Ваш ТТН: " . $responseArray['return']['orderNum'][0];
     #TODO внести в JSON файл
