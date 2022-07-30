@@ -21,8 +21,10 @@ class UseDeskHandler
         header("Content-Type: application/json");
         try {
             $postTicketId = Input::getTicketId();
-            $htmlString = require $_SERVER['DOCUMENT_ROOT'] . "../../views/usedesk-button-content.php";
-        }  catch (\Exception $e) {
+
+            $htmlString = self::getBlockHtml($postTicketId);
+
+        } catch (\Exception $e) {
             Log::error(Log::INPUT, "Exception: " . $e->getMessage());
             $htmlString = 'Произошла ошибка'; #TODO может реальный 404?
         }
@@ -55,7 +57,7 @@ class UseDeskHandler
 
         // Прекращаем выполнение, если айди тикета из адресной строки не найден
         if (empty($ticketId)) {
-            Log::error(Log::INPUT,TICKET_ID_KEY_NAME . " не был найден");
+            Log::error(Log::INPUT, TICKET_ID_KEY_NAME . " не был найден");
             echo "Это страница 404 :)"; #TODO может реальный 404?
             exit();
         }
@@ -63,5 +65,23 @@ class UseDeskHandler
         Log::info(Log::INPUT, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
 
         echo require $_SERVER['DOCUMENT_ROOT'] . "../../views/dpd-create-order-form.php";
+    }
+
+
+
+    /**
+     * Возвращает HTML-содержимое блока в интерфейсе UseDesk
+     *
+     * Временное решение до лучших идей (нужно вернуть как строку, с подменной переменных)  #TODO
+     *
+     * @param int $postTicketId
+     *
+     * @return string
+     */
+    private static function getBlockHtml(int $postTicketId)
+    {
+        $ticketIdKeyName = TICKET_ID_KEY_NAME;
+        $urlScriptPhp = URL_SCRIPT_PHP;
+        return "<a class='btn btn-green' href='$urlScriptPhp?$ticketIdKeyName=$postTicketId'>Оформить ТТН</a>";
     }
 }
