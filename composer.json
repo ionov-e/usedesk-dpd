@@ -3,5 +3,10 @@
     "ext-json": "*",
     "ext-soap": "*",
     "vlucas/phpdotenv": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src"
+    }
   }
 }

@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Handler;
+
+use App\Helper\Input;
+use App\Log;
+use App\Service\DpdApi;
+
+class UseDeskHandler
+{
+
+    /**
+     * Ответ при переходе в UseDesk на страницу тикета (при включенном блоке)
+     *
+     * @return void
+     */
+    static function responseToBlock()
+    {
+        Log::info(Log::START, 'Ответ на Пост-запрос от UseDesk блока');
+
+        header("Content-Type: application/json");
+        try {
+            $postTicketId = Input::getTicketId();
+            $htmlString = require $_SERVER['DOCUMENT_ROOT'] . "../../views/usedesk-button-content.php";
+        }  catch (\Exception $e) {
+            Log::error(Log::INPUT, "Exception: " . $e->getMessage());
+            $htmlString = 'Произошла ошибка'; #TODO может реальный 404?
+        }
+
+        echo json_encode(array('html' => $htmlString)); // Вывод web-блока UseDesk
+        exit();
+    }
+
+    /**
+     * Ответ при переходе со страницы тикета UseDesk на создание ТТН в DPD
+     *
+     * @return void
+     */
+    static function createOrder()
+    {
+        Log::info(LOG::START, 'Форма прислана для отправки в DPD');
+        echo DpdApi::createOrder();
+    }
+
+    /**
+     * Выводит форму для создания заказа на отправку в DPD
+     *
+     * @return void
+     */
+    static function generateForm()
+    {
+        Log::info(LOG::START, 'Переход из UseDesk на форму создания ТТН');
+
+        $ticketId = $_GET[TICKET_ID_KEY_NAME];
+
+        // Прекращаем выполнение, если айди тикета из адресной строки не найден
+        if (empty($ticketId)) {
+            Log::error(LOG::INPUT,TICKET_ID_KEY_NAME . " не был найден");
+            echo "Это страница 404 :)"; #TODO может реальный 404?
+            exit();
+        }
+
+        Log::info(LOG::INPUT, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
+
+        echo require $_SERVER['DOCUMENT_ROOT'] . "../../views/dpd-create-order-form.php";
+    }
+}
