@@ -38,7 +38,7 @@ class UseDeskHandler
      */
     static function createOrder()
     {
-        Log::info(LOG::START, 'Форма прислана для отправки в DPD');
+        Log::info(Log::START, 'Форма прислана для отправки в DPD');
         echo DpdApi::createOrder();
     }
 
@@ -49,18 +49,18 @@ class UseDeskHandler
      */
     static function generateForm()
     {
-        Log::info(LOG::START, 'Переход из UseDesk на форму создания ТТН');
+        Log::info(Log::START, 'Переход из UseDesk на форму создания ТТН');
 
         $ticketId = $_GET[TICKET_ID_KEY_NAME];
 
         // Прекращаем выполнение, если айди тикета из адресной строки не найден
         if (empty($ticketId)) {
-            Log::error(LOG::INPUT,TICKET_ID_KEY_NAME . " не был найден");
+            Log::error(Log::INPUT,TICKET_ID_KEY_NAME . " не был найден");
             echo "Это страница 404 :)"; #TODO может реальный 404?
             exit();
         }
 
-        Log::info(LOG::INPUT, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
+        Log::info(Log::INPUT, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
 
         echo require $_SERVER['DOCUMENT_ROOT'] . "../../views/dpd-create-order-form.php";
     }
