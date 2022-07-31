@@ -3,7 +3,8 @@
 namespace App\Handler;
 
 use App\Log;
-use App\Service\DpdApi;
+use App\Service\DpdOrderCreation;
+use App\Service\UsedeskBlock;
 
 class UseDeskHandler
 {
@@ -19,9 +20,9 @@ class UseDeskHandler
 
         header("Content-Type: application/json");
         try {
-            $postTicketId = self::getTicketIdFromPostJson();
+            $postTicketId = UsedeskBlock::getTicketIdFromPostJson();
 
-            $htmlString = self::getBlockHtml($postTicketId);
+            $htmlString = UsedeskBlock::getBlockHtml($postTicketId);
 
         } catch (\Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
@@ -40,7 +41,7 @@ class UseDeskHandler
     {
         Log::info(Log::DPD_ORDER, 'Старт');
 
-        echo DpdApi::createOrder();
+        echo DpdOrderCreation::createOrder();
     }
 
     /**
@@ -62,56 +63,5 @@ class UseDeskHandler
         }
 
         echo require PROJECT_DIR . "/views/dpd-create-order-form.php";
-    }
-
-
-    /**
-     * Возвращает HTML-содержимое блока в интерфейсе UseDesk
-     *
-     * Временное решение до лучших идей (нужно вернуть как строку, с подменной переменных)  #TODO референс - Yii2 проект
-     *
-     * @param int $postTicketId
-     *
-     * @return string
-     */
-    private static function getBlockHtml(int $postTicketId): string
-    {
-        $ticketIdKeyName = TICKET_ID_KEY_NAME;
-        $urlScriptPhp = URL_SCRIPT_PHP;
-        return "<a class='btn btn-green' href='$urlScriptPhp?$ticketIdKeyName=$postTicketId'>Оформить ТТН</a>";
-    }
-
-    /**
-     * Возвращает ID Тикета, если находит внутри Post-запроса
-     *
-     * @return int
-     *
-     * @throws \Exception
-     */
-    private static function getTicketIdFromPostJson(): int
-    {
-        Log::debug(LOG::UD_BLOCK, "Пробуем получить  ID Тикета из Post-запроса");
-
-        $errorMsg = 'ID Тикета не найден'; // Переменная будет использоваться, только если не найден ID
-
-        try {
-            $postJson = file_get_contents('php://input');
-            $data = json_decode($postJson);
-            $ticketId = intval($data->{TICKET_ID_KEY_NAME});
-            if (!empty($ticketId)) { // Здесь может быть и "0" - нас это тоже не устраивает
-                Log::info(LOG::UD_BLOCK, "ID Тикета:" . $ticketId);
-                return $ticketId;
-            }
-        } catch (\Exception $e) {
-            $errorMsg .= $e->getMessage();
-        }
-
-        if (empty($postJson)) {
-            Log::warning(LOG::UD_BLOCK, "Ничего не было прислано");
-        } else {
-            Log::warning(LOG::UD_BLOCK, "Вместо ID тикета Было прислано:" . PHP_EOL . $postJson);
-        }
-
-        throw new \Exception($errorMsg);
     }
 }

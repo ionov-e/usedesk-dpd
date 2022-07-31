@@ -1,10 +1,14 @@
 <?php
 
+/**
+ *  Класс для создания ТТН в DPD
+ */
+
 namespace App\Service;
 
 use App\Log;
 
-class DpdApi
+class DpdOrderCreation
 {
 
     const URL_ORDER = URL_DPD_DOMAIN . "services/order2?wsdl";
