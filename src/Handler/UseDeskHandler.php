@@ -41,7 +41,14 @@ class UseDeskHandler
     static function createOrder()
     {
         Log::info(Log::START, 'Форма прислана для отправки в DPD');
-        echo DpdApi::createOrder();
+
+        $form = Input::getFormData();
+
+        $ticketId = $form[TICKET_ID_KEY_NAME]; // Для лога
+
+        $arRequest = Input::getDataToSendToCreateOrder($form);
+
+        echo DpdApi::createOrder($ticketId, $arRequest);
     }
 
     /**
@@ -66,7 +73,6 @@ class UseDeskHandler
 
         echo require $_SERVER['DOCUMENT_ROOT'] . "../../views/dpd-create-order-form.php";
     }
-
 
 
     /**
