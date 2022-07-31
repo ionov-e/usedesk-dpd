@@ -7,7 +7,6 @@ use App\Log;
 /**
  * Обрабатывает полученные данные от пользователя
  */
-
 class Input
 {
 
@@ -29,17 +28,17 @@ class Input
             $data = json_decode($postJson);
             $ticketId = intval($data->{TICKET_ID_KEY_NAME});
             if (!empty($ticketId)) { // Здесь может быть и "0" - нас это тоже не устраивает
-                Log::info(LOG::INPUT,"ID Тикета:" . $ticketId);
+                Log::info(LOG::INPUT, "ID Тикета:" . $ticketId);
                 return $ticketId;
             }
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             $errorMsg .= ". Exception: " . $e->getMessage();
         }
 
         if (empty($postJson)) {
-            Log::warning(LOG::INPUT,"Ничего не было прислано");
+            Log::warning(LOG::INPUT, "Ничего не было прислано");
         } else {
-            Log::warning(LOG::INPUT,"Были присланы данные:" . PHP_EOL . $postJson);
+            Log::warning(LOG::INPUT, "Были присланы данные:" . PHP_EOL . $postJson);
         }
 
         throw new \Exception($errorMsg);
@@ -158,7 +157,7 @@ class Input
 
         $arData['order'] = array(
             'orderNumberInternal' => $form['orderNumberInternal'], // ваш личный код (я использую код из таблицы заказов ID)
-            'serviceCode' => $form['serviceCode'], // тариф. 3-ех буквенный. PCL - то что нужно (DPD OPTIMUM)
+            'serviceCode' => 'PCL', //$form['serviceCode'], // тариф. 3-ех буквенный. PCL - то что нужно (DPD OPTIMUM)
             'serviceVariant' => 'ДД', // вариант доставки ДД - дверь-дверь
             'cargoNumPack' => $form['cargoNumPack'], //количество мест
             'cargoWeight' => $form['cargoWeight'],// вес посылок Пример: 0.05 (после точки не более 2-х знаков)
