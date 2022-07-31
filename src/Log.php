@@ -8,12 +8,10 @@ namespace App;
 class Log
 {
     // Категории логирования
-    const FTP = 'ftp';
-    const SOAP = 'soap';
-    const FORM = 'form';
-    const INPUT = 'input';
-    const START = 'start';
-    const STATE = 'state';
+    const DPD_CITIES = 'dpd_cities';
+    const DPD_FORM = 'dpd_form';
+    const DPD_ORDER = 'dpd_order';
+    const UD_BLOCK = 'ud_block';
 
 
     #TODO Минимальный уровень имплементировать

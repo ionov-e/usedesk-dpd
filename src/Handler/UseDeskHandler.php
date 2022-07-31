@@ -16,16 +16,16 @@ class UseDeskHandler
      */
     public static function generateUsedeskBlockHtml(): void
     {
-        Log::info(Log::START, 'Ответ на Пост-запрос от UseDesk блока');
+        Log::info(Log::UD_BLOCK, 'Старт');
 
         header("Content-Type: application/json");
         try {
-            $postTicketId = InputHelper::getTicketId();
+            $postTicketId = InputHelper::getTicketIdFromPostJson();
 
             $htmlString = self::getBlockHtml($postTicketId);
 
         } catch (\Exception $e) {
-            Log::error(Log::INPUT, "Exception: " . $e->getMessage());
+            Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
             $htmlString = 'Произошла ошибка'; #TODO может реальный 404?
         }
 
@@ -39,11 +39,11 @@ class UseDeskHandler
      */
     public static function createDpdOrder(): void
     {
-        Log::info(Log::START, 'Форма прислана для отправки в DPD');
+        Log::info(Log::DPD_ORDER, 'Старт');
 
         $form = InputHelper::getFormData();
 
-        $ticketId = $form[TICKET_ID_KEY_NAME]; // Для лога
+        $ticketId = $form[TICKET_ID_KEY_NAME];
 
         $arRequest = InputHelper::getDataToSendToCreateOrder($form);
 
@@ -57,14 +57,14 @@ class UseDeskHandler
      */
     public static function generateFormForOrder(): void
     {
-        Log::info(Log::START, 'Переход из UseDesk на форму создания ТТН');
+        Log::info(Log::DPD_FORM, 'Старт');
 
         $ticketId = $_GET[TICKET_ID_KEY_NAME];
-        Log::info(Log::INPUT, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
+        Log::info(Log::DPD_FORM, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
 
         // Прекращаем выполнение, если айди тикета из адресной строки не найден
         if (empty($ticketId)) {
-            Log::error(Log::INPUT, "Не был прислан " . TICKET_ID_KEY_NAME);
+            Log::error(Log::DPD_FORM, "Не был прислан " . TICKET_ID_KEY_NAME);
             echo "Не были переданы все обязательные параметры";
         }
 

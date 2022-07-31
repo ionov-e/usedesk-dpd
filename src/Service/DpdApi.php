@@ -27,7 +27,7 @@ class DpdApi
             $client = new \SoapClient (self::URL_ORDER);
             $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD
         } catch (\SoapFault $e) {
-            Log::error(Log::SOAP, "Exception: " . $e->getMessage());
+            Log::error(Log::DPD_ORDER, "Попытались создать ТТН. Получили Exception: " . $e->getMessage());
             return 'Произошла ошибка';
         }
 
@@ -43,16 +43,16 @@ class DpdApi
 // OrderCancelled – заказ отменен
 
         if ($return->status == 'OK') {
-            Log::info(Log::SOAP,  "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            Log::info(Log::DPD_ORDER,  "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             return "Успешно создано! Ваш ТТН: " . $return->orderNum;
             #TODO внести в JSON файл
         } elseif ($return->status == 'OrderPending') {
-            Log::warning(Log::SOAP, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
                 "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
             #TODO внести в JSON файл (иначе). На каждый Пост-запрос с этим тикетом отправлять статус-чек
         } else {
-            Log::error(Log::SOAP, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             return $return->errorMessage; //выводим ошибки
         }
     }

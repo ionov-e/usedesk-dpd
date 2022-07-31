@@ -17,28 +17,28 @@ class InputHelper
      *
      * @throws \Exception
      */
-    public static function getTicketId(): int
+    public static function getTicketIdFromPostJson(): int
     {
-        Log::debug(LOG::INPUT, "Пробуем получить  ID Тикета из Post-запроса");
+        Log::debug(LOG::UD_BLOCK, "Пробуем получить  ID Тикета из Post-запроса");
 
-        $errorMsg = 'ID Тикета не найден';
+        $errorMsg = 'ID Тикета не найден'; // Переменная будет использоваться, только если не найден ID
 
         try {
             $postJson = file_get_contents('php://input');
             $data = json_decode($postJson);
             $ticketId = intval($data->{TICKET_ID_KEY_NAME});
             if (!empty($ticketId)) { // Здесь может быть и "0" - нас это тоже не устраивает
-                Log::info(LOG::INPUT, "ID Тикета:" . $ticketId);
+                Log::info(LOG::UD_BLOCK, "ID Тикета:" . $ticketId);
                 return $ticketId;
             }
         } catch (\Exception $e) {
-            $errorMsg .= ". Exception: " . $e->getMessage();
+            $errorMsg .= $e->getMessage();
         }
 
         if (empty($postJson)) {
-            Log::warning(LOG::INPUT, "Ничего не было прислано");
+            Log::warning(LOG::UD_BLOCK, "Ничего не было прислано");
         } else {
-            Log::warning(LOG::INPUT, "Были присланы данные:" . PHP_EOL . $postJson);
+            Log::warning(LOG::UD_BLOCK, "Вместо ID тикета Было прислано:" . PHP_EOL . $postJson);
         }
 
         throw new \Exception($errorMsg);
@@ -51,7 +51,7 @@ class InputHelper
      */
     public static function getFormData(): array
     {
-        Log::info(Log::INPUT, "Получили из формы: " . json_encode($_POST));
+        Log::info(Log::DPD_ORDER, "Получили из формы: " . json_encode($_POST));
 
         $form = $_POST;
 
@@ -112,7 +112,7 @@ class InputHelper
      */
     public static function getDataToSendToCreateOrder(array $form): array
     {
-        Log::debug(Log::STATE, "Из данных формы формируем массив для отправки на создание ТТН");
+        Log::debug(Log::DPD_ORDER, "Из данных формы формируем массив для отправки на создание ТТН");
 
         $arData = array();
 
@@ -205,7 +205,7 @@ class InputHelper
 
         $arRequest['orders'] = $arData; // помещаем запрос в orders
 
-        Log::debug(Log::SOAP, "Для создания заказа сформировали такой массив: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+        Log::debug(Log::DPD_ORDER, "Для создания заказа сформировали массив: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
         return $arRequest;
     }
 
