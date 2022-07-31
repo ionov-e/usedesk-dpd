@@ -2,24 +2,21 @@
 
 namespace App\Service;
 
-use SoapClient;
 use App\Log;
 
 class DpdApi
 {
 
-    const URL_GEOGRAPHY = URL_DPD_DOMAIN . "services/geography2?wsdl";
     const URL_ORDER = URL_DPD_DOMAIN . "services/order2?wsdl";
 
-#TODO Переделать для сохранения всех городов в один файл.
-#TODO log
+#TODO Добавить функцию для получения / обновления списка всех городов. Хранить в JSON
 #TODO Повесить CRON-задачу
 
     /**
-     *
+     * Создание заказа на отправку в DPD
      *
      * @param string $ticketId
-     * @param array $form
+     * @param array $arRequest
      *
      * @return string
      */
@@ -58,36 +55,5 @@ class DpdApi
             Log::error(Log::SOAP, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             return $return->errorMessage; //выводим ошибки
         }
-    }
-
-
-//responseArray findCity(196050161);
-//responseArray findCity(1960501610420942390); // Неверный айди города
-
-//Пример запроса
-//$city = ‘Калуга’;
-//$findcity = findCity($city); //так мы запишем номер города из DPD в нашу переменную.
-
-    static function findCity($cityId)
-    {
-        $client = new SoapClient (self::URL_GEOGRAPHY);
-
-        $arData['auth'] = array(
-            'clientNumber' => CLIENT_NUMBER,
-            'clientKey' => CLIENT_KEY);
-        $arRequest['request'] = $arData; //помещаем наш массив авторизации в массив запроса request.
-        $ret = $client->getCitiesCashPay($arRequest); //обращаемся к функции getCitiesCashPay и получаем список городов.
-
-//        $mass = stdToArray($ret); //вызываем эту самую функцию для того чтобы можно было перебрать массив #TODO Не нужна будет
-//
-//        foreach ($mass as $key => $key1) {
-//            foreach ($key1 as $cityid => $city) {
-//                if (in_array($cityId, $city)) {
-//                    return $city['cityId']; // если мы находим этот город в массиве (который мы искали) - возвращаем
-//                }
-//            }
-//        }
-
-        return 0; // Значит не найден такой город
     }
 }
