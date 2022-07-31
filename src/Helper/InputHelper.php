@@ -17,7 +17,7 @@ class InputHelper
      *
      * @throws \Exception
      */
-    static function getTicketId(): int
+    public static function getTicketId(): int
     {
         Log::debug(LOG::INPUT, "Пробуем получить  ID Тикета из Post-запроса");
 
@@ -55,6 +55,8 @@ class InputHelper
 
         $form = $_POST;
 
+
+        #TODO удалить из $_POST пустые значения
         #TODO убрать тестовые строки ниже. Получать значения из формы
         #TODO проверки сюда нужно на данные
 
@@ -173,7 +175,6 @@ class InputHelper
                 'house' => $form['receiverAddress']['house'],
                 'contactFio' => $form['receiverAddress']['contactFio'],
                 'contactPhone' => $form['receiverAddress']['contactPhone']
-                #TODO спросить про необходимость почты?
             ),
             'cargoRegistered' => false
         );

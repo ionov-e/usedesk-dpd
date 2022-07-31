@@ -30,7 +30,7 @@ class Log
      *
      * @return Log
      */
-    static public function getLogger(): Log
+    public static function getLogger(): Log
     {
         if (self::$instance == null) {
             self::$instance = new Log();
@@ -38,27 +38,27 @@ class Log
         return self::$instance;
     }
 
-    static function debug(string $category, string $message): void
+    public static function debug(string $category, string $message): void
     {
         self::getLogger()->logMsg('debug', $category, $message);
     }
 
-    static function info(string $category, string $message): void
+    public static function info(string $category, string $message): void
     {
         self::getLogger()->logMsg('info', $category, $message);
     }
 
-    static function warning(string $category, string $message): void
+    public static function warning(string $category, string $message): void
     {
         self::getLogger()->logMsg('warning', $category, $message);
     }
 
-    static function error(string $category, string $message): void
+    public static function error(string $category, string $message): void
     {
         self::getLogger()->logMsg('error', $category, $message);
     }
 
-    static function critical(string $category, string $message): void
+    public static function critical(string $category, string $message): void
     {
         self::getLogger()->logMsg('critical', $category, $message);
     }

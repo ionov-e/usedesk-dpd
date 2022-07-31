@@ -11,10 +11,10 @@ require_once "../config/global.php";
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') { // Get-запрос: Переход на форму из HTML-блока (в Get: ticketID)
-    UseDeskHandler::generateForm();
+    UseDeskHandler::generateFormForOrder();
 } elseif (!empty($_POST)) { // Post-запрос с содержанием формы
-    UseDeskHandler::createOrder();
+    UseDeskHandler::createDpdOrder();
 } else { // Post-запрос (content-type: json) c ticketId для HTML-блока в ЮзДеске
-    UseDeskHandler::respondToBlock();
+    UseDeskHandler::generateUsedeskBlockHtml();
 }
 exit();

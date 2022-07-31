@@ -10,13 +10,11 @@ class UseDeskHandler
 {
 
     /**
-     * Выодит на экран... #TODO добавить
-     *
-     * Ответ при переходе в UseDesk на страницу тикета (при включенном блоке)
+     * Возвращает HTML содержимое для отображения в UseDesk-е на страницах тикета (при включенном блоке)
      *
      * @return void
      */
-    static function respondToBlock(): void
+    public static function generateUsedeskBlockHtml(): void
     {
         Log::info(Log::START, 'Ответ на Пост-запрос от UseDesk блока');
 
@@ -35,11 +33,11 @@ class UseDeskHandler
     }
 
     /**
-     * Ответ при переходе со страницы тикета UseDesk на создание ТТН в DPD #TODO исправить
+     * Создает ТТН в DPD используя данные из заполненной формы
      *
      * @return void
      */
-    static function createOrder(): void
+    public static function createDpdOrder(): void
     {
         Log::info(Log::START, 'Форма прислана для отправки в DPD');
 
@@ -57,7 +55,7 @@ class UseDeskHandler
      *
      * @return void
      */
-    static function generateForm(): void
+    public static function generateFormForOrder(): void
     {
         Log::info(Log::START, 'Переход из UseDesk на форму создания ТТН');
 
