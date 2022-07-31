@@ -20,7 +20,7 @@ class DpdApi
      *
      * @return string
      */
-    static function createOrder(string $ticketId, array $arRequest): string
+    public static function createOrder(string $ticketId, array $arRequest): string
     {
 
         try { // IDE не подсказывает, но Soap может кидать SoapFault исключения

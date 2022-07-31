@@ -15,6 +15,8 @@ define('CLIENT_KEY', $_ENV['CLIENT_KEY']);
 define('URL_SCRIPT_DOMAIN', $_ENV['URL_SCRIPT_DOMAIN']);
 define('URL_DPD_DOMAIN', $_ENV['URL_DPD_DOMAIN']);
 
+define('PROJECT_DIR', dirname(__DIR__, 1));
+
 
 const URL_SCRIPT_PHP = URL_SCRIPT_DOMAIN . '/usedesk-dpd.php';  // URL на который должны приходить запросы от UseDesk
 const LOG_FOLDER_ROOT = 'log';                                  // Название папки для логов

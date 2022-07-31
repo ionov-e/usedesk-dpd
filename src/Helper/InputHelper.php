@@ -7,7 +7,7 @@ use App\Log;
 /**
  * Обрабатывает полученные данные от пользователя
  */
-class Input
+class InputHelper
 {
 
     /**
@@ -45,7 +45,7 @@ class Input
     }
 
     /**
-     * Возвращает массив с данными из формы
+     * Возвращает массив с данными из формы  #TODO Del
      *
      * @return array
      */
@@ -206,5 +206,28 @@ class Input
 
         Log::debug(Log::SOAP, "Для создания заказа сформировали такой массив: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
         return $arRequest;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    static function csvToJson($csvPath) {
+        if (!($contents = fopen($csvPath, 'r'))) {
+            throw new \Exception("Не вышло открыть файл");
+        }
+
+        $key = fgetcsv($contents,"256",",");
+
+        // parse csv rows into array
+        $json = array();
+        while ($row = fgetcsv($contents,"256",",")) {
+            $json[] = array_combine($key, $row);
+        }
+
+        // release file handle
+        fclose($contents);
+
+        // encode array to json
+        return json_encode($json);
     }
 }
