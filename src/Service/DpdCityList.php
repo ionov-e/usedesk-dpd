@@ -66,7 +66,7 @@ class DpdCityList
 
 
         while ($row = self::customfgetcsv($contents, "400", ";")) {
-            if (str_starts_with($row[5], 'Россия')) {
+            if (!str_starts_with($row[5], 'Россия')) {
                 continue;
             }
 
@@ -84,7 +84,7 @@ class DpdCityList
             Log::warning(Log::DPD_CITIES, "функция fclose после работы с CSV вернула False");
         }
 
-        return [json_encode($array1), json_encode($array2)];
+        return [json_encode($array1, JSON_UNESCAPED_UNICODE), json_encode($array2, JSON_UNESCAPED_UNICODE)];
     }
 
 
