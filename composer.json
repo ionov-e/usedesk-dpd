@@ -2,7 +2,8 @@
   "require": {
     "ext-json": "*",
     "ext-soap": "*",
-    "vlucas/phpdotenv": "*"
+    "vlucas/phpdotenv": "*",
+    "ext-iconv": "*"
   },
   "autoload": {
     "psr-4": {
