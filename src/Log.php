@@ -8,7 +8,8 @@ namespace App;
 class Log
 {
     // Категории логирования
-    const DPD_CITIES = 'dpd_cities';
+    const DPD_CITY_FIND = 'dpd_city_find';
+    const DPD_CITY_UPD = 'dpd_city_upd';
     const DPD_FORM = 'dpd_form';
     const DPD_ORDER = 'dpd_order';
     const UD_BLOCK = 'ud_block';

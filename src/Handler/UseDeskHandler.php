@@ -53,15 +53,15 @@ class UseDeskHandler
     {
         Log::info(Log::DPD_FORM, 'Старт');
 
-        $ticketId = $_GET[TICKET_ID_KEY_NAME];
-        Log::info(Log::DPD_FORM, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
-
         // Прекращаем выполнение, если айди тикета из адресной строки не найден
-        if (empty($ticketId)) {
-            Log::error(Log::DPD_FORM, "Не был прислан " . TICKET_ID_KEY_NAME);
+        if (empty($ticketId = $_GET[TICKET_ID_KEY_NAME])) {
+            Log::warning(Log::DPD_FORM, "Не был прислан " . TICKET_ID_KEY_NAME);
             echo "Не были переданы все обязательные параметры";
+            exit();
         }
 
-        echo require PROJECT_DIR . "/views/dpd-create-order-form.php";
+        Log::info(Log::DPD_FORM, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
+
+        echo require PROJECT_DIR . "/views/dpd-create-order-form.php"; // Тут используется переменная $ticketId
     }
 }
