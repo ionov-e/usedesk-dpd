@@ -18,6 +18,12 @@ class DpdCityList
     const CITY_LIST_IDS_PATH = self::LIST_FOLDER . 'city-list-ids.json';        // Ключами выступают - ID нас. пункта
     const CITY_LIST_CITIES_PATH = self::LIST_FOLDER . 'city-list-cities.json';  // Ключами выступают - Название нас. пункта
 
+    // ФТП-соединение с DPD (файл с городами)
+    const FTP_FILENAME_PART = 'GeographyDPD';
+
+    const CITY_LIST_ORIGINAL_PATH = self::LIST_FOLDER . self::FTP_FILENAME_PART . '.csv';
+
+
     /**
      * Возвращает Json с городами, удовлетворяющими поисковому запросу
      *
@@ -49,12 +55,65 @@ class DpdCityList
 
         Log::info(Log::DPD_CITY_UPD, "Старт");
         try {
-            $csvPath = self::LIST_FOLDER . "csv/GeographyDPD_20220725.csv"; #TODO сделать скачивание с ФТП, и передачу ссылки
-            $jsons = self::csvToJson($csvPath);
+            self::downloadCsvFromFtp();
+            $jsons = self::csvToJson(self::CITY_LIST_ORIGINAL_PATH);
             self::saveJsons($jsons);
         } catch (\Exception $e) {
-            Log::error(Log::DPD_CITY_UPD, "Exception" . $e->getMessage());
+            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Выкачивает файл с фтп с заменой уже скачанного
+     *
+     * @return void
+     *
+     * @throws \Exception
+     */
+    private static function downloadCsvFromFtp(): void
+    {
+        $ftp = ftp_connect(FTP_SERVER); // установка соединения
+
+        if (!$ftp) {
+            throw new \Exception("FTP ошибка: Не Удалось подсоединиться к серверу");
+        }
+
+        if (!ftp_login($ftp, FTP_USER, FTP_PASSWORD)) {
+            throw new \Exception("FTP ошибка: Неверный логин / пароль");
+        }
+
+        ftp_pasv($ftp, true);
+
+
+        $remoteFolder = 'integration'; // В документации от DPD сказано об этой папке. Сама в руте, а в ней искомый CSV
+
+        if (!$listOfFilesOnServer = ftp_nlist($ftp, $remoteFolder)) {
+            throw new \Exception("FTP ошибка: Не получилось получить список файлов");
+        }
+
+        $remoteFilename = ""; // Сюда запишем название файла для скачивания
+
+        foreach ($listOfFilesOnServer as $filename) { // Среди всех файлов в руте на сайте ищем необходимый
+            if (str_contains($filename, self::FTP_FILENAME_PART) && str_contains($filename, ".csv")) {
+                $remoteFilename = $filename;
+                break;
+            }
+        }
+
+        if (empty($remoteFilename)) {
+            throw new \Exception("На FTP не было найдено файла с упоминанием " . self::FTP_FILENAME_PART .
+                " среди: " . implode(", ", $listOfFilesOnServer));
+        }
+
+        Log::debug(Log::DPD_CITY_UPD, "Пытаемся выкачать с FTP файл: $remoteFilename");
+
+        if (!ftp_get($ftp, self::CITY_LIST_ORIGINAL_PATH, $remoteFilename, FTP_ASCII)) {
+            throw new \Exception("FTP ошибка: Не удалось скачать существующий файл: $remoteFilename");
+        }
+
+        ftp_close($ftp);
+
+        Log::info(Log::DPD_CITY_UPD, "Успешно скачали с FTP файл: $remoteFilename");
     }
 
     /**

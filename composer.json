@@ -3,7 +3,8 @@
     "ext-json": "*",
     "ext-soap": "*",
     "vlucas/phpdotenv": "*",
-    "ext-iconv": "*"
+    "ext-iconv": "*",
+    "ext-ftp": "*"
   },
   "autoload": {
     "psr-4": {
