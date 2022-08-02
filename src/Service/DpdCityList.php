@@ -107,6 +107,13 @@ class DpdCityList
 
         Log::debug(Log::DPD_CITY_UPD, "Пытаемся выкачать с FTP файл: $remoteFilename");
 
+        // Проверяет создана ли соответствующая папка. Создает, если не существует
+        if (!is_dir(self::LIST_FOLDER)) {
+            if (!mkdir(self::LIST_FOLDER, 0770, true)) {
+                Log::critical(Log::DPD_CITY_UPD, "Не получилось создать папку: " . self::LIST_FOLDER);
+            }
+        }
+
         if (!ftp_get($ftp, self::CITY_LIST_ORIGINAL_PATH, $remoteFilename, FTP_ASCII)) {
             throw new \Exception("FTP ошибка: Не удалось скачать существующий файл: $remoteFilename");
         }
