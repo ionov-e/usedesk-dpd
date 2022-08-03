@@ -199,6 +199,10 @@ class DpdOrderCreation
             $arData['header']['senderAddress']['flat'] = $form['senderAddress']['flat'];// Номер квартиры, например: 144А
         }
 
+        if (!empty($form['senderAddress']['index'])) {
+            $arData['header']['senderAddress']['index'] = $form['senderAddress']['index'];// Почтовый индекс
+        }
+
 
         $arData['order'] = array(
             'orderNumberInternal' => $form['orderNumberInternal'], // ваш личный код (я использую код из таблицы заказов ID)
@@ -240,6 +244,10 @@ class DpdOrderCreation
 
         if (!empty($form['receiverAddress']['flat'])) {
             $arData['order']['receiverAddress']['flat'] = $form['receiverAddress']['flat'];// Номер квартиры, например: 144А
+        }
+
+        if (!empty($form['receiverAddress']['index'])) {
+            $arData['order']['receiverAddress']['index'] = $form['receiverAddress']['index'];// Почтовый индекс
         }
 
 //$arData['order']['extraService'][0] = array('esCode' => 'EML', 'param' => array('name' => 'email', 'value' => $select["email"]));
