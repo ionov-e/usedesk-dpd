@@ -18,13 +18,17 @@ define('FTP_SERVER', $_ENV['FTP_SERVER']);
 define('FTP_USER', $_ENV['FTP_USER']);
 define('FTP_PASSWORD', $_ENV['FTP_PASSWORD']);
 
-define('PROJECT_DIR', dirname(__DIR__, 1));
+define('PROJECT_DIR', dirname(__DIR__, 1));              // Корневая папка
 
+const URL_SCRIPT_PHP = URL_SCRIPT_DOMAIN . '/usedesk-dpd.php';      // URL на который должны приходить запросы от UseDesk
+const LOG_FOLDER_ROOT = PROJECT_DIR . DIRECTORY_SEPARATOR . 'log';  // Путь к папке для логов
+const DATA_FOLDER_ROOT = PROJECT_DIR . DIRECTORY_SEPARATOR . 'data';// Путь к папке для хранения данных
+const DATA_JSON = DATA_FOLDER_ROOT. DIRECTORY_SEPARATOR . 'bd.json';// Здесь наша главное БД (с ID тикетов, № ТТН, Статусом ТТН)
+const TTN_JSON_KEY = 'ttn';                                         // Под таким ключом хранится в JSON созданное ТТН для Тикета
+const STATE_JSON_KEY = 'state';                                     // Под таким ключом хранится в JSON статус созданного ТТН для Тикета
+const TICKET_ID_KEY_NAME = 'ticket_id';                             // Название параметра в Post-запросе от UseDesk
+const CITY_SEARCH_KEY_NAME = "city_search";                         // Название параметра в Get-запросе из формы при вводе в поле город
 
-const URL_SCRIPT_PHP = URL_SCRIPT_DOMAIN . '/usedesk-dpd.php';  // URL на который должны приходить запросы от UseDesk
-const LOG_FOLDER_ROOT = 'log';                                  // Название папки для логов
-const TICKET_ID_KEY_NAME = 'ticket_id';                         // Такое используется в Post-запросе от UseDesk
-const CITY_SEARCH_KEY_NAME = "city_search";                     // Используется в Get-запросе из формы при вводе в поле город
 
 // Установка часового пояса как в примере (где бы не выполнялся скрипт - одинаковое время)
 date_default_timezone_set('Europe/Moscow');

@@ -13,7 +13,7 @@ class DpdCityList
 
     const MAX_CITY_COUNT_TO_RETURN = 15;  // Максимальное количество подходящих городов для возврата в форму создания ТТН
 
-    const LIST_FOLDER = PROJECT_DIR . '/data/dpd-cities/';
+    const LIST_FOLDER = DATA_FOLDER_ROOT . '/dpd-cities/';
     // Пути к JSON-файлам со списком городов
     const CITY_LIST_IDS_PATH = self::LIST_FOLDER . 'city-list-ids.json';        // Ключами выступают - ID нас. пункта
     const CITY_LIST_CITIES_PATH = self::LIST_FOLDER . 'city-list-cities.json';  // Ключами выступают - Название нас. пункта
@@ -213,7 +213,6 @@ class DpdCityList
         $isError = false;
 
         // Проверяет создана ли соответствующая папка. Создает, если не существует
-        // Можно было бы вынести проверку коренной папке при инициализации, а другие нет - может пройти месяц, год (в новые папке сохранять)
         if (!is_dir(self::LIST_FOLDER)) {
             mkdir(self::LIST_FOLDER, 0770, true);
         }

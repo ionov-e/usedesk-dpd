@@ -73,7 +73,7 @@ class Log
      */
     private function logMsg(string $level, string $category, string $message): void
     {
-        $logFolder = PROJECT_DIR . DIRECTORY_SEPARATOR . LOG_FOLDER_ROOT . DIRECTORY_SEPARATOR . date('Y') . DIRECTORY_SEPARATOR . date('m');
+        $logFolder = LOG_FOLDER_ROOT . DIRECTORY_SEPARATOR . date('Y') . DIRECTORY_SEPARATOR . date('m');
 
         // Проверяет создана ли соответствующая папка. Создает, если не существует
         // Можно было бы вынести проверку коренной папке при инициализации, а другие нет - может пройти месяц, год (в новые папке сохранять)

@@ -6,37 +6,31 @@
 
 namespace App\Service;
 
+use App\DB;
 use App\Log;
 
-class DpdOrderCreation
+class DpdOrder
 {
 
     const URL_ORDER = URL_DPD_DOMAIN . "services/order2?wsdl";
-
-#TODO Добавить функцию для получения / обновления списка всех городов. Хранить в JSON
-#TODO Повесить CRON-задачу
 
     /**
      * Создание заказа на отправку в DPD
      *
      * @return string
+     * @throws \Exception
      */
     public static function createOrder(): string
     {
-
         $form = self::getFormData();
 
         $ticketId = $form[TICKET_ID_KEY_NAME];
 
         $arRequest = self::getDataToSendToCreateOrder($form);
 
-        try { // IDE не подсказывает, но Soap может кидать SoapFault исключения
-            $client = new \SoapClient (self::URL_ORDER);
-            $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD
-        } catch (\SoapFault $e) {
-            Log::error(Log::DPD_ORDER, "Попытались создать ТТН. Получили Exception: " . $e->getMessage());
-            return 'Произошла ошибка';
-        }
+        // IDE не подсказывает, но Soap может кидать SoapFault исключения
+        $client = new \SoapClient (self::URL_ORDER);
+        $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD
 
 // StdClass. Обязательные ключи: orderNumberInternal, status. Необязательные: orderNum, pickupDate, dateFlag, errorMessage
 
@@ -51,13 +45,13 @@ class DpdOrderCreation
 
         if ($return->status == 'OK') {
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            DB::saveToBD($ticketId, $return->orderNum, $return->status);
             return "Успешно создано! Ваш ТТН: " . $return->orderNum;
-            #TODO внести в JSON файл
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            DB::saveToBD($ticketId, $return->orderNum, $return->status);
             return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
                 "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
-            #TODO внести в JSON файл (иначе). На каждый Пост-запрос с этим тикетом отправлять статус-чек
         } else {
             Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             return $return->errorMessage; //выводим ошибки
@@ -259,4 +253,5 @@ class DpdOrderCreation
         Log::debug(Log::DPD_ORDER, "Для создания заказа сформировали массив: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
         return $arRequest;
     }
+
 }

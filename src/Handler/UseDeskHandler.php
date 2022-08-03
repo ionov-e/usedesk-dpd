@@ -3,7 +3,7 @@
 namespace App\Handler;
 
 use App\Log;
-use App\Service\DpdOrderCreation;
+use App\Service\DpdOrder;
 use App\Service\UsedeskBlock;
 
 class UseDeskHandler
@@ -40,8 +40,13 @@ class UseDeskHandler
     public static function createDpdOrder(): void
     {
         Log::info(Log::DPD_ORDER, 'Старт');
-
-        echo DpdOrderCreation::createOrder();
+        try {
+            echo DpdOrder::createOrder();
+        } catch (\SoapFault $e) {
+            Log::error(Log::DPD_ORDER, "Попытались создать ТТН. Получили Exception: " . $e->getMessage());
+        } catch (\Exception $e) {
+            echo "Произошла ошибка";
+        }
     }
 
     /**
