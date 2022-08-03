@@ -53,9 +53,8 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
         </div>
 
         <div class="form-group">
-            <label for="cargoNumPack">Количество посылок в отправке</label>
-            <input name="cargoNumPack" id="cargoNumPack" placeholder="1" type="text" class="form-control"
-                   required>
+            <label for="cargoNumPack">Количество посылок в отправке (если не заполнить - отправиться "1"</label>
+            <input name="cargoNumPack" id="cargoNumPack" placeholder="1" type="text" class="form-control">
         </div>
         <div class="form-group">
             <label for="cargoWeight">Вес посылки (в кг)</label>
@@ -74,8 +73,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
         </div>
         <div class="form-group">
             <label for="cargoCategory">Категория содержимого</label>
-            <input name="cargoCategory" id="cargoCategory" placeholder="Товары" type="text" class="form-control"
-                   required>
+            <input name="cargoCategory" id="cargoCategory" placeholder="Товары" type="text" class="form-control">
         </div>
         <div class="form-row">
             <div class="form-group col-md-6">
@@ -92,7 +90,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[name]">Имя/Название организации</label>
+                <label for="receiverAddress[name]">Имя/Название организации (если не заполнить - отправится "ООО 'ФИРМЕННЫЕ РЕШЕНИЯ'")</label>
                 <input name="receiverAddress[name]" id="receiverAddress[name]"
                        placeholder="ООО 'ФИРМЕННЫЕ РЕШЕНИЯ'" type="text" class="form-control">
             </div>
@@ -104,7 +102,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        placeholder="Смирнов Игорь Николаевич" type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[contactFio]">ФИО</label>
+                <label for="receiverAddress[contactFio]">ФИО (если не заполнить - отправится "Сотрудник склада")</label>
                 <input name="receiverAddress[contactFio]" id="receiverAddress[contactFio]"
                        placeholder="Сотрудник склада" type="text" class="form-control">
             </div>
@@ -116,19 +114,19 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        placeholder="89165555555" type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[contactPhone]">Контактный телефон</label>
+                <label for="receiverAddress[contactPhone]">Контактный телефон (если не заполнить - отправится "244 68 04")</label>
                 <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]"
                        placeholder="244 68 04" type="text" class="form-control">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col">
-                <label for="senderAddressCity">Город</label>
-                <input name="senderAddressCity" id="senderAddressCity" placeholder="Люберцы" type="text"
+                <label for="senderAddress[city]">Город</label>
+                <input name="senderAddress[city]" id="senderAddressCity" placeholder="Люберцы" type="text"
                        class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[city]">Город</label>
+                <label for="receiverAddress[city]">Город (если не заполнить - отправится "Петро-Славянка")</label>
                 <input name="receiverAddress[city]" id="receiverAddress[city]" placeholder="Петро-Славянка"
                        type="text" class="form-control">
             </div>
@@ -141,7 +139,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[region]">Регион</label>
+                <label for="receiverAddress[region]">Регион (если не заполнить - отправится "Санкт-Петербург")</label>
                 <input name="receiverAddress[region]" id="receiverAddress[region]" placeholder="Санкт-Петербург"
                        type="text" class="form-control">
             </div>
@@ -153,7 +151,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[street]">Наименование улицы</label>
+                <label for="receiverAddress[street]">Наименование улицы (если не заполнить - отправится "Софийская")</label>
                 <input name="receiverAddress[street]" id="receiverAddress[street]" placeholder="Софийская"
                        type="text" class="form-control">
             </div>
@@ -165,7 +163,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[streetAbbr]">Аббревиатура улицы</label>
+                <label for="receiverAddress[streetAbbr]">Аббревиатура улицы (если не заполнить - отправится "ул")</label>
                 <input name="receiverAddress[streetAbbr]" id="receiverAddress[streetAbbr]" placeholder="ул"
                        type="text" class="form-control">
             </div>
@@ -177,7 +175,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
                        class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[house]">Номер дома</label>
+                <label for="receiverAddress[house]">Номер дома (если не заполнить - отправится "118", а в корпусе "5")</label>
                 <input name="receiverAddress[house]" id="receiverAddress[house]" placeholder="118" type="text"
                        class="form-control">
             </div>
