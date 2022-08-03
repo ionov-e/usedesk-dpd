@@ -35,12 +35,14 @@ class DpdCityList
         $query = $_GET[CITY_SEARCH_KEY_NAME];
         Log::debug(Log::DPD_CITY_FIND, "От пользователя: $query");
 
-        $cityIds = self::getCityIds($query);
+        try {
+            $cityIds = self::getCityIds($query);
 
-        $returnArray = self::getCityArray($cityIds);
-
-        echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
-
+            $returnArray = self::getCityArray($cityIds);
+            echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
+        } catch (\Exception $e) {
+            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
+        }
     }
 
     /**
