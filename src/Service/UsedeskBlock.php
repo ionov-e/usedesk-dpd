@@ -65,9 +65,11 @@ class UsedeskBlock
 
         if ($ttnArray[STATE_JSON_KEY] == 'OK') {  // Случай, если ТТН со статусом ОК
             return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
+        } elseif ($ttnArray[STATE_JSON_KEY] == 'OrderPending') {  // Случай: OrderPending. Номер не ТТН, а внутренний передается
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
         }
 
-        #TODO OrderPending, OrderCancelled
+        #TODO , OrderCancelled
 
         // Случай, если ТТН не создано для тикета
         return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $postTicketId]);

@@ -49,7 +49,7 @@ class DpdOrder
             return "Успешно создано! Ваш ТТН: " . $return->orderNum;
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveToBD($ticketId, $return->orderNum, $return->status);
+            DB::saveToBD($ticketId, $return->orderNum, $return->status); // Вписываем не orderNum, а orderNumberInternal
             return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
                 "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
         } else {
