@@ -115,8 +115,7 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
             <div class="form-group col">
                 <label for="receiverAddress[contactPhone]">Контактный телефон (если не заполнить - отправится
                     "244 68 04")</label>
-                <input name="receiverAddress[contactPhone]" placeholder="244 68 04" type="text"
-                       class="form-control">
+                <input name="receiverAddress[contactPhone]" placeholder="244 68 04" type="text" class="form-control">
             </div>
         </div>
         <div class="form-row">
@@ -130,31 +129,19 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
             </div>
         </div>
         <div class="form-row">
-            <div class="form-group col">
-                <label for="senderAddress[city]">Город</label>
-                <input name="senderAddress[city]" id="senderAddressCity" placeholder="Люберцы" type="text"
-                       class="form-control" required>
+            <div class="form-group col" id="cityListParent">
+                <label>Населенный пункт</label>
+                <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
             </div>
             <div class="form-group col">
-                <label for="receiverAddress[city]">Город (если не заполнить - отправится
-                    "Петро-Славянка")</label>
-                <input name="receiverAddress[city]" placeholder="Петро-Славянка" type="text"
-                       class="form-control">
+                <label>Город (если не заполнить - отправится "Петро-Славянка")</label>
+                <input id="receiverCityFront" placeholder="Петро-Славянка" type="text" class="form-control">
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-group col">
-                <label for="senderAddress[region]">Регион</label>
-                <input name="senderAddress[region]" placeholder="Московская обл." type="text"
-                       class="form-control" required>
-            </div>
-            <div class="form-group col">
-                <label for="receiverAddress[region]">Регион (если не заполнить - отправится
-                    "Санкт-Петербург")</label>
-                <input name="receiverAddress[region]" placeholder="Санкт-Петербург" type="text"
-                       class="form-control">
-            </div>
-        </div>
+        <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
+        <input hidden name="receiverAddress[city]" id="receiverCity" type="text" class="form-control">
+        <input hidden name="senderAddress[region]" id="senderRegion" type="text" class="form-control">
+        <input hidden name="receiverAddress[region]" id="receiverRegion" type="text" class="form-control">
         <div class="form-row">
             <div class="form-group col">
                 <label for="senderAddress[street]">Наименование улицы</label>
@@ -239,19 +226,56 @@ $modifyDays = 1; #TODO Посмотреть на счет этого момен�
 <script>
 
 
-    document.querySelector('#senderAddressCity').addEventListener('keyup', searching);
+    document.querySelector('#senderCityFront').addEventListener('keyup', searching);
+
 
     function searching(e) {
-        var keywordsStr = e.target.value;
+        let keywordsStr = e.target.value;
         if (keywordsStr.length < 3) {
             return;
         }
         fetch('<?= INDEX_FILE_USEDESK ?>?<?= CITY_SEARCH_KEY_NAME ?>=' + encodeURI(keywordsStr))
             .then((response) => response.json())
-            .then((data) => console.log(data));
-        // .then((data) => {
-        //     let result = JSON.parse(data)
-        // });
+            .then((data) => {
+
+                let previousDiv = document.querySelector('#cityList');
+                if (previousDiv) {
+                    previousDiv.remove();
+                }
+
+                let newDiv = document.createElement('div');
+                newDiv.setAttribute('id', 'cityListDiv');
+                document.querySelector('#cityListParent').appendChild(newDiv);
+
+                let header = document.createElement('h5');
+                header.append("Выберите из списка:")
+                newDiv.appendChild(header);
+
+                let newUl = document.createElement('ul');
+                newUl.setAttribute('class', 'list-group');
+                newDiv.setAttribute('id', 'cityList');
+                newDiv.appendChild(newUl);
+
+                data.forEach(createAForSenderCity);
+            });
+    }
+
+    function createAForSenderCity(cityArray) {
+        console.log(cityArray);
+        let newA = document.createElement('a');
+        newA.setAttribute('class', 'list-group-item list-group-item-action');
+        newA.setAttribute('href', '#senderAddressCityParent');
+        newA.dataset.abrv = cityArray[0];
+        newA.dataset.city = cityArray[1];
+        newA.dataset.region = cityArray[2];
+        newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
+        document.querySelector('#cityList').appendChild(newA);
+        newA.addEventListener('click', function () {
+            document.querySelector('#senderCityFront').value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
+            document.querySelector('#senderCity').value = this.dataset.city;
+            document.querySelector('#senderRegion').value = this.dataset.region;
+            document.querySelector('#cityList').remove();
+        });
     }
 
     $(document).ready(function () {
