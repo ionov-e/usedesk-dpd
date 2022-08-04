@@ -6,7 +6,6 @@
 
 namespace App\Service;
 
-use App\DB;
 use App\Log;
 
 class UsedeskBlock
@@ -51,28 +50,23 @@ class UsedeskBlock
     /**
      * Возвращает HTML-содержимое блока в интерфейсе UseDesk
      *
-     * @param int $postTicketId
+     * @param int $ticketId
      *
      * @return string
      *
      * @throws \Exception
      */
-    public static function getBlockHtml(int $postTicketId): string
+    public static function getBlockHtml(int $ticketId): string
     {
-        $ttnArray = DB::getTtn($postTicketId);
-
-        #TODO CheckStatus
+        $ttnArray = DpdOrder::checkOrder($ticketId);
 
         if ($ttnArray[STATE_JSON_KEY] == 'OK') {  // Случай, если ТТН со статусом ОК
             return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
         } elseif ($ttnArray[STATE_JSON_KEY] == 'OrderPending') {  // Случай: OrderPending. Номер не ТТН, а внутренний передается
             return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
         }
-
-        #TODO , OrderCancelled
-
         // Случай, если ТТН не создано для тикета
-        return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $postTicketId]);
+        return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId]);
 
     }
 

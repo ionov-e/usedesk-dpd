@@ -18,6 +18,7 @@ class DpdOrder
      * Создание заказа на отправку в DPD
      *
      * @return string
+     *
      * @throws \Exception
      */
     public static function createOrder(): string
@@ -30,26 +31,26 @@ class DpdOrder
 
         // IDE не подсказывает, но Soap может кидать SoapFault исключения
         $client = new \SoapClient (self::URL_ORDER);
-        $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD
-
-// StdClass. Обязательные ключи: orderNumberInternal, status. Необязательные: orderNum, pickupDate, dateFlag, errorMessage
-
+        $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD, получаем StdClass
         $return = $responseStd->return;
 
-// Статусы могут быть:
-// OK – заказ на доставку успешно создан с номером, указанным в поле orderNum.
-// OrderPending – заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена.
-// OrderDuplicate – заказ на доставку не может быть принять по причине, указанной в поле errorMessage.
-// OrderError – заказ на доставку не может быть создан по причине, указанной в поле errorMessage.
-// OrderCancelled – заказ отменен
+        //Обязательные ключи: orderNumberInternal, status.
+        //Необязательные: orderNum, errorMessage, pickupDate, dateFlag (последние 2 - ни разу не наблюдал)
+
+        // Статусы могут быть:
+        // OK – заказ на доставку успешно создан с номером, указанным в поле orderNum.
+        // OrderPending – заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена.
+        // OrderDuplicate – заказ на доставку не может быть принять по причине, указанной в поле errorMessage.
+        // OrderError – заказ на доставку не может быть создан по причине, указанной в поле errorMessage.
+        // OrderCancelled – заказ отменен
 
         if ($return->status == 'OK') {
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveToBD($ticketId, $return->orderNum, $return->status);
+            DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
             return "Успешно создано! Ваш ТТН: " . $return->orderNum;
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status); // Вписываем не orderNum, а orderNumberInternal
+            DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status);
             return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
                 "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
         } else {
@@ -58,6 +59,67 @@ class DpdOrder
         }
     }
 
+    /**
+     * Статус-чек заказа в DPD. Возвращает актуальный массив тикета форамата { int => $int, state => $statusDPD, ttn => $ttn }
+     *
+     * Особенность: возвращается пустой архив и если Тикет в "БД" не найден, и если статус изменился (на "плохой") и удалили из БД
+     *
+     * @param string $ticketId
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public static function checkOrder(string $ticketId): array
+    {
+        $ttnArray = DB::getTtn($ticketId);
+
+        if (empty($ttnArray)) {
+            return [];
+        }
+
+        $arData = array();
+
+        $arData['auth'] = self::getAuthArray();
+
+        $arData['order'] = array('orderNumberInternal' => $ttnArray[INTERNAL_JSON_KEY]);
+
+        $arRequest['orderStatus'] = $arData; // помещаем запрос в orders
+
+        Log::debug(Log::UD_BLOCK, "Сформиловали массив для получения статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+
+        // IDE не подсказывает, но Soap может кидать SoapFault исключения
+        $client = new \SoapClient (self::URL_ORDER);
+        $responseStd = $client->getOrderStatus($arRequest); //делаем запрос в DPD
+
+        // StdClass.
+        //Обязательные ключи: orderNumberInternal, status.
+        //Необязательные: orderNum, errorMessage, pickupDate, dateFlag (последние 2 - ни разу не наблюдал)
+
+        $return = $responseStd->return;
+
+        // Если статус не изменился - возвращаем значения из "БД"
+        if ($return->status == $ttnArray[STATE_JSON_KEY]) {
+            Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус не изменился: {$ttnArray[STATE_JSON_KEY]}");
+            return $ttnArray;
+        }
+
+        // Если статус изменился - записываем изменения в "БД"
+
+        $logMessage = "Тикет $ticketId поменял свой статус с " . $ttnArray[STATE_JSON_KEY] . " на " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
+
+        if ($return->status == 'OK') {
+            Log::info(Log::UD_BLOCK, $logMessage);
+            return DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, Log::UD_BLOCK);
+        } elseif ($return->status == 'OrderPending') {
+            Log::warning(Log::UD_BLOCK, $logMessage);
+            return DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, Log::UD_BLOCK);
+        } else { // Все остальные случаи - удаляем из БД
+            Log::error(Log::UD_BLOCK, $logMessage);
+            DB::removeTicket($ticketId, Log::UD_BLOCK);
+            return [];
+        }
+    }
 
     /**
      * Возвращает массив с данными из формы
@@ -69,7 +131,6 @@ class DpdOrder
         Log::info(Log::DPD_ORDER, "Получили из формы: " . json_encode($_POST, JSON_UNESCAPED_UNICODE));
 
         $form = $_POST;
-
 
         // Начнем с необязательного поля. Если пришло пустое - может и нужно оставить пустым. Поэтому проверяем вместе с № дома
         if (empty($form['receiverAddress']['houseKorpus']) && empty($form['receiverAddress']['house'])) {
@@ -94,49 +155,6 @@ class DpdOrder
                 unset($element);
             }
         }
-
-        #TODO проверки сюда нужно на данные
-
-//        $form = [];
-//
-//        $form['$ticketId'] = '123123121';
-//
-//        $form['orderNumberInternal'] = '220620-sdfs';
-//        $form['serviceCode'] = 'PCL';
-//        $form['cargoNumPack'] = '1';
-//        $form['cargoWeight'] = '60';
-//        $form['cargoVolume'] = '5';
-//        $form['cargoValue'] = '60000';
-//        $form['cargoCategory'] = 'Товары';
-//
-//        $form['senderAddress']['name'] = 'Илья Отправитель';
-//        $form['senderAddress']['datePickup'] = '2022-08-02'; // 2016-07-26
-//        $form['senderAddress']['pickupTimePeriod'] = '9-18';
-//        $form['senderAddress']['city'] = 'Люберцы'; // Люберцы // 196050161  ???
-//        $form['senderAddress']['region'] = 'Московская обл.';
-//        $form['senderAddress']['street'] = 'Авиаторов';
-//        $form['senderAddress']['streetAbbr'] = 'ул';
-//        $form['senderAddress']['house'] = '1';
-//        $form['senderAddress']['houseKorpus'] = ''; // Корпус, например: А
-//        $form['senderAddress']['str'] = ''; // Строение, например: 1
-//        $form['senderAddress']['office'] = ''; // Офис, например: 12Б
-//        $form['senderAddress']['flat'] = ''; // Номер квартиры, например: 144А
-//        $form['senderAddress']['contactFio'] = 'Смирнов Игорь Николаевич';
-//        $form['senderAddress']['contactPhone'] = '89165555555';
-//
-//        $form['receiverAddress']['name'] = 'ООО "ФИРМЕННЫЕ РЕШЕНИЯ"';
-//        $form['receiverAddress']['city'] = 'Петро-Славянка';
-//        $form['receiverAddress']['region'] = 'Санкт-Петербург';
-//        $form['receiverAddress']['street'] = 'Софийская';
-//        $form['receiverAddress']['streetAbbr'] = 'ул';
-//        $form['receiverAddress']['house'] = '118';
-//        $form['receiverAddress']['contactFio'] = 'Сотрудник склада';
-//        $form['receiverAddress']['contactPhone'] = '244 68 04';
-//        $form['receiverAddress']['houseKorpus'] = '5';
-//        $form['receiverAddress']['str'] = '';
-//        $form['receiverAddress']['office'] = '';
-//        $form['receiverAddress']['flat'] = '';
-
         return $form;
     }
 
@@ -153,13 +171,10 @@ class DpdOrder
 
         $arData = array();
 
-        $arData['auth'] = array(
-            'clientNumber' => CLIENT_NUMBER,
-            'clientKey' => CLIENT_KEY
-        ); // данные авторизации
+        $arData['auth'] = self::getAuthArray();
 
         $arData['header'] = array( //отправитель
-            'datePickup' => $form['senderAddress']['datePickup'], //дата того когда вашу посылку заберут
+            'datePickup' => $form['senderAddress']['datePickup'],             //дата того когда посылку заберут
             'pickupTimePeriod' => $form['senderAddress']['pickupTimePeriod'], //время для курьера: 9-18, 9-13, 13-18
             'senderAddress' => array(
                 'name' => $form['senderAddress']['name'],
@@ -199,17 +214,17 @@ class DpdOrder
 
 
         $arData['order'] = array(
-            'orderNumberInternal' => $form['orderNumberInternal'], // ваш личный код (я использую код из таблицы заказов ID)
+            'orderNumberInternal' => $form['orderNumberInternal'],
             'serviceCode' => 'PCL', //$form['serviceCode'], // тариф. 3-ех буквенный. PCL - то что нужно (DPD OPTIMUM)
-            'serviceVariant' => 'ДД', // вариант доставки ДД - дверь-дверь
-            'cargoNumPack' => $form['cargoNumPack'], //количество мест
-            'cargoWeight' => $form['cargoWeight'],// вес посылок Пример: 0.05 (после точки не более 2-х знаков)
-            'cargoVolume' => $form['cargoVolume'], // объём посылок
-            'cargoValue' => $form['cargoValue'], // оценочная стоимость
-            'cargoCategory' => $form['cargoCategory'], // Пример: Одежда
+            'serviceVariant' => 'ДД',                   // вариант доставки ДД - дверь-дверь
+            'cargoNumPack' => $form['cargoNumPack'],    //количество мест
+            'cargoWeight' => $form['cargoWeight'],      // вес посылок Пример: 0.05 (после точки не более 2-х знаков)
+            'cargoVolume' => $form['cargoVolume'],      // объём посылок
+            'cargoValue' => $form['cargoValue'],        // оценочная стоимость
+            'cargoCategory' => $form['cargoCategory'],  // Пример: Одежда / Товары
             'receiverAddress' => array(
                 'name' => $form['receiverAddress']['name'],
-                'countryName' => 'Россия',
+                'countryName' => 'Россия',              // Другие кажется не надо
                 'city' => $form['receiverAddress']['city'],
                 'region' => $form['receiverAddress']['region'],
                 'street' => $form['receiverAddress']['street'],
@@ -244,14 +259,27 @@ class DpdOrder
             $arData['order']['receiverAddress']['index'] = $form['receiverAddress']['index'];// Почтовый индекс
         }
 
-//$arData['order']['extraService'][0] = array('esCode' => 'EML', 'param' => array('name' => 'email', 'value' => $select["email"]));
-//$arData['order']['extraService'][1] = array('esCode' => 'НПП', 'param' => array('name' => 'sum_npp', 'value' => $select["cena"]));
-//$arData['order']['extraService'][2] = array('esCode' => 'ОЖД', 'param' => array('name' => 'reason_delay', 'value' => 'СООТ')); // пример нескольких опций
+        //$arData['order']['extraService'][0] = array('esCode' => 'EML', 'param' => array('name' => 'email', 'value' => $select["email"]));
+        //$arData['order']['extraService'][1] = array('esCode' => 'НПП', 'param' => array('name' => 'sum_npp', 'value' => $select["cena"]));
+        //$arData['order']['extraService'][2] = array('esCode' => 'ОЖД', 'param' => array('name' => 'reason_delay', 'value' => 'СООТ')); // пример нескольких опций
 
         $arRequest['orders'] = $arData; // помещаем запрос в orders
 
         Log::debug(Log::DPD_ORDER, "Для создания заказа сформировали массив: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
         return $arRequest;
+    }
+
+    /**
+     * Возвращает массив с данными авторизации для SOAP
+     *
+     * @return array
+     */
+    private static function getAuthArray()
+    {
+        return array(
+            'clientNumber' => CLIENT_NUMBER,
+            'clientKey' => CLIENT_KEY
+        );
     }
 
 }

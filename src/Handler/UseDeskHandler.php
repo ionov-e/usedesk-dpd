@@ -20,16 +20,15 @@ class UseDeskHandler
 
         header("Content-Type: application/json");
         try {
-            $postTicketId = UsedeskBlock::getTicketIdFromPostJson();
-
-            $htmlString = UsedeskBlock::getBlockHtml($postTicketId);
+            $ticketId = UsedeskBlock::getTicketIdFromPostJson();
+            $htmlString = UsedeskBlock::getBlockHtml($ticketId);
 
         } catch (\Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
             $htmlString = 'Произошла ошибка';
         }
 
-        echo json_encode(array('html' => $htmlString)); // Вывод web-блока UseDesk
+        echo json_encode(array('html' => $htmlString), JSON_UNESCAPED_UNICODE); // Вывод web-блока UseDesk
     }
 
     /**
