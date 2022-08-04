@@ -13,15 +13,20 @@ class DpdCityList
 
     const MAX_CITY_COUNT_TO_RETURN = 15;  // Максимальное количество подходящих городов для возврата в форму создания ТТН
 
-    const LIST_FOLDER = DATA_FOLDER_ROOT . '/dpd-cities/';
+    const LIST_FOLDER_NEW = DATA_FOLDER_ROOT . '/dpd-cities/';
     // Пути к JSON-файлам со списком городов
-    const CITY_LIST_IDS_PATH = self::LIST_FOLDER . 'city-list-ids.json';        // Ключами выступают - ID нас. пункта
-    const CITY_LIST_CITIES_PATH = self::LIST_FOLDER . 'city-list-cities.json';  // Ключами выступают - Название нас. пункта
+    const CITY_LIST_IDS_PATH_NEW = self::LIST_FOLDER_NEW . 'city-list-ids.json';       // Ключами выступают - ID нас. пункта
+    const CITY_LIST_CITIES_PATH_NEW = self::LIST_FOLDER_NEW . 'city-list-cities.json'; // Ключами выступают - Название нас. пункта
+
+    const LIST_FOLDER_SAFE = DATA_FOLDER_ROOT . '/dpd-cities-ready/';
+    // Пути к JSON-файлам со списком городов
+    const CITY_LIST_IDS_PATH_SAFE = self::LIST_FOLDER_SAFE . 'city-list-ids.json';       // Ключами выступают - ID нас. пункта
+    const CITY_LIST_CITIES_PATH_SAFE = self::LIST_FOLDER_SAFE . 'city-list-cities.json'; // Ключами выступают - Название нас. пункта
 
     // ФТП-соединение с DPD (файл с городами)
     const FTP_FILENAME_PART = 'GeographyDPD';
 
-    const CITY_LIST_ORIGINAL_PATH = self::LIST_FOLDER . self::FTP_FILENAME_PART . '.csv';
+    const CITY_LIST_ORIGINAL_PATH = self::LIST_FOLDER_NEW . self::FTP_FILENAME_PART . '.csv';
 
 
     /**
@@ -110,9 +115,9 @@ class DpdCityList
         Log::debug(Log::DPD_CITY_UPD, "Пытаемся выкачать с FTP файл: $remoteFilename");
 
         // Проверяет создана ли соответствующая папка. Создает, если не существует
-        if (!is_dir(self::LIST_FOLDER)) {
-            if (!mkdir(self::LIST_FOLDER, 0770, true)) {
-                Log::critical(Log::DPD_CITY_UPD, "Не получилось создать папку: " . self::LIST_FOLDER);
+        if (!is_dir(self::LIST_FOLDER_NEW)) {
+            if (!mkdir(self::LIST_FOLDER_NEW, 0770, true)) {
+                Log::critical(Log::DPD_CITY_UPD, "Не получилось создать папку: " . self::LIST_FOLDER_NEW);
             }
         }
 
@@ -213,17 +218,17 @@ class DpdCityList
         $isError = false;
 
         // Проверяет создана ли соответствующая папка. Создает, если не существует
-        if (!is_dir(self::LIST_FOLDER)) {
-            mkdir(self::LIST_FOLDER, 0770, true);
+        if (!is_dir(self::LIST_FOLDER_NEW)) {
+            mkdir(self::LIST_FOLDER_NEW, 0770, true);
         }
 
-        if (!file_put_contents(self::CITY_LIST_IDS_PATH, $jsons[0])) {
-            Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_IDS_PATH);
+        if (!file_put_contents(self::CITY_LIST_IDS_PATH_NEW, $jsons[0])) {
+            Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_IDS_PATH_NEW);
             $isError = true;
         }
 
-        if (!file_put_contents(self::CITY_LIST_CITIES_PATH, $jsons[1])) {
-            Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_CITIES_PATH);
+        if (!file_put_contents(self::CITY_LIST_CITIES_PATH_NEW, $jsons[1])) {
+            Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_CITIES_PATH_NEW);
             $isError = true;
         }
 
@@ -244,13 +249,20 @@ class DpdCityList
     private static function getCityIds(string $query): array
     {
 
-        $input = file_get_contents(self::CITY_LIST_CITIES_PATH);
+        if (DPD_CITY_LIST_SAFE_MODE) { // В безопасном режиме используем только проверенные данные
+            $file = self::CITY_LIST_CITIES_PATH_SAFE;
+        } else {
+            $file = self::CITY_LIST_CITIES_PATH_NEW;
+        }
+
+        $input = file_get_contents($file);
+
         mb_convert_encoding($input, "UTF-8", "auto");
 
         $cityList = json_decode($input);
 
         if (empty($cityList)) {
-            Log::critical(Log::DPD_CITY_FIND, "Файл с городами пуст: " . self::CITY_LIST_CITIES_PATH);
+            Log::critical(Log::DPD_CITY_FIND, "Файл с городами пуст: $file");
         }
 
         $returnArray = [];
@@ -280,7 +292,12 @@ class DpdCityList
      */
     private static function getCityArray(array $cityIds): array
     {
-        $input = file_get_contents(self::CITY_LIST_IDS_PATH);
+        if (DPD_CITY_LIST_SAFE_MODE) {  // В безопасном режиме используем только проверенные данные
+            $input = file_get_contents(self::CITY_LIST_IDS_PATH_SAFE);
+        } else {
+            $input = file_get_contents(self::CITY_LIST_IDS_PATH_NEW);
+        }
+
         mb_convert_encoding($input, "UTF-8", "auto");
 
         $cityList = json_decode($input); // Возвращает StdClass

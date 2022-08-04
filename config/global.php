@@ -17,6 +17,7 @@ define('URL_DPD_DOMAIN', $_ENV['URL_DPD_DOMAIN']);
 define('FTP_SERVER', $_ENV['FTP_SERVER']);
 define('FTP_USER', $_ENV['FTP_USER']);
 define('FTP_PASSWORD', $_ENV['FTP_PASSWORD']);
+define('DPD_CITY_LIST_SAFE_MODE', $_ENV['DPD_CITY_LIST_SAFE_MODE']);
 
 define('PROJECT_DIR', dirname(__DIR__, 1));              // Корневая папка
 
