@@ -10,3 +10,7 @@
     background-color: #FFF;
     background-position: center;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
