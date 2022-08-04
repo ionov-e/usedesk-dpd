@@ -6,10 +6,14 @@
 
 namespace App\Service;
 
+use App\DB;
 use App\Log;
 
 class UsedeskBlock
 {
+    const UD_BLOCK_NEW_VIEW = PROJECT_DIR . '/views/ud-block-new.php';
+    const UD_BLOCK_OK = PROJECT_DIR . '/views/ud-block-ok.php';
+
     /**
      * Возвращает ID Тикета, если находит внутри Post-запроса
      *
@@ -19,7 +23,7 @@ class UsedeskBlock
      */
     public static function getTicketIdFromPostJson(): int
     {
-        Log::debug(LOG::UD_BLOCK, "Пробуем получить  ID Тикета из Post-запроса");
+        Log::debug(Log::UD_BLOCK, "Пробуем получить  ID Тикета из Post-запроса");
 
         $errorMsg = 'ID Тикета не найден'; // Переменная будет использоваться, только если не найден ID
 
@@ -28,7 +32,7 @@ class UsedeskBlock
             $data = json_decode($postJson);
             $ticketId = intval($data->{TICKET_ID_KEY_NAME});
             if (!empty($ticketId)) { // Здесь может быть и "0" - нас это тоже не устраивает
-                Log::info(LOG::UD_BLOCK, "ID Тикета:" . $ticketId);
+                Log::info(Log::UD_BLOCK, "ID Тикета:" . $ticketId);
                 return $ticketId;
             }
         } catch (\Exception $e) {
@@ -36,9 +40,9 @@ class UsedeskBlock
         }
 
         if (empty($postJson)) {
-            Log::warning(LOG::UD_BLOCK, "Ничего не было прислано");
+            Log::warning(Log::UD_BLOCK, "Ничего не было прислано");
         } else {
-            Log::warning(LOG::UD_BLOCK, "Вместо ID тикета Было прислано:" . PHP_EOL . $postJson);
+            Log::warning(Log::UD_BLOCK, "Вместо ID тикета Было прислано:" . PHP_EOL . $postJson);
         }
 
         throw new \Exception($errorMsg);
@@ -47,16 +51,46 @@ class UsedeskBlock
     /**
      * Возвращает HTML-содержимое блока в интерфейсе UseDesk
      *
-     * Временное решение до лучших идей (нужно вернуть как строку, с подменной переменных)  #TODO референс - Yii2 проект
-     *
      * @param int $postTicketId
      *
      * @return string
+     *
+     * @throws \Exception
      */
     public static function getBlockHtml(int $postTicketId): string
     {
-        $ticketIdKeyName = TICKET_ID_KEY_NAME;
-        $urlScriptPhp = URL_SCRIPT_PHP;
-        return "<a class='btn btn-green' href='$urlScriptPhp?$ticketIdKeyName=$postTicketId'>Оформить ТТН</a>";
+        $ttnArray = DB::getTtn($postTicketId);
+
+        #TODO CheckStatus
+
+        if ($ttnArray[STATE_JSON_KEY] == 'OK') {  // Случай, если ТТН со статусом ОК
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
+        }
+
+        #TODO OrderPending, OrderCancelled
+
+        // Случай, если ТТН не создано для тикета
+        return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $postTicketId]);
+
+    }
+
+    /**
+     * Возвращает отрендеренный PHP-файл. Можно в файл передать аргументы
+     *
+     * @param string $path
+     * @param array $args
+     *
+     * @return string
+     */
+    private static function renderPhp(string $path, array $args = []): string
+    {
+        ob_start();
+        include($path);
+        $var = ob_get_contents();
+        ob_end_clean();
+        if (empty($var)) {
+            Log::critical(Log::UD_BLOCK, "Не вышло отрендерить файл: $path с аргументами: " . json_encode($args));
+        }
+        return $var;
     }
 }

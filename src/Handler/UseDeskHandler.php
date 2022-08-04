@@ -26,7 +26,7 @@ class UseDeskHandler
 
         } catch (\Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
-            $htmlString = 'Произошла ошибка'; #TODO может реальный 404?
+            $htmlString = 'Произошла ошибка';
         }
 
         echo json_encode(array('html' => $htmlString)); // Вывод web-блока UseDesk
