@@ -57,8 +57,6 @@ class DpdCityList
      */
     public static function update(): void
     {
-        // Без следующей строки CSV-файл от DPD не будет видеть конец строки (используется разделить строк: \r
-        ini_set("auto_detect_line_endings", true);
 
         Log::info(Log::DPD_CITY_UPD, "Старт");
         try {
@@ -140,10 +138,6 @@ class DpdCityList
      */
     private static function csvToJson(string $csvPath): array
     {
-        if (!($contents = fopen($csvPath, 'r'))) {
-            throw new \Exception("Не вышло открыть файл");
-        }
-
 
         // Пример строки из файла: 4553454126;RU91000008000;г;Ялта;Респ Крым;Россия
         // Из такого массива:
@@ -154,7 +148,6 @@ class DpdCityList
         //      2) Используем элементы: id - 0 (4553454126), city - 3 (Ялта)
         //          Записываем: 3 => [0, 0, 0]   // 3 (city) - неуникален. А в значении - массив с уникальными ID
 
-
         $array1 = array();
         $array2 = array();
 
@@ -162,8 +155,17 @@ class DpdCityList
         $maxIdsForOneCityName = 0; // Используем для лога - узнать максимальное количество одинаково названных населенных пунктов
 
 
-        while ($row = self::customfgetcsv($contents, "400", ";")) {
-            if (!str_starts_with($row[5], 'Россия')) {
+        $string = iconv('WINDOWS-1251', 'UTF-8', file_get_contents($csvPath)); // Получаем строку, конвертируем
+
+        $data = str_getcsv($string, ";"); // Получаем сплошным, неподеленным на строки массивом
+
+        $rows = array_chunk($data, 5); // Несмотря на то, что 6 элементов в элементе - не получается увидеть разделение строк
+        // Т.е. Последний элемент и предыдущей строки у нас объединен с первым из следующим. Выходит: Россия4553454126.
+        // Нам, к счастью, оба элемента не нужны. Точно так же определить страну можно по второму элементу
+
+        foreach ($rows as $row) {
+
+            if (!str_starts_with($row[1], 'RU')) {
                 continue;
             }
 
@@ -185,25 +187,7 @@ class DpdCityList
         Log::info(Log::DPD_CITY_UPD, "Из CSV забрали городов РФ: $cityCount");
         Log::info(Log::DPD_CITY_UPD, "Название одного города повторялось максимально $maxIdsForOneCityName раз");
 
-        if (!fclose($contents)) {
-            Log::warning(Log::DPD_CITY_UPD, "функция fclose после работы с CSV вернула False");
-        }
-
         return [json_encode($array1, JSON_UNESCAPED_UNICODE), json_encode($array2, JSON_UNESCAPED_UNICODE)];
-    }
-
-
-    /**
-     * Заменяет работу fgetcsv, но с решением проблемы кириллицы с конкретными CSV-файлами
-     *
-     * Совершенно не собираюсь брать заслуги за свое спасение этой функцией. Источник: https://stackoverflow.com/a/19213270
-     */
-    private static function customfgetcsv(&$handle, $length, $separator = ';')
-    {
-        if (($buffer = fgets($handle, $length)) !== false) {
-            return explode($separator, iconv("CP1251", "UTF-8", $buffer));
-        }
-        return false;
     }
 
     /**
