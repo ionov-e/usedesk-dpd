@@ -271,19 +271,6 @@ class DpdCityList
     }
 
     /**
-     * Function to check string starting  with given substring
-     *
-     * @param $string
-     * @param $startString
-     * @return bool
-     */
-    private static function startsWith (string $string, string $startString): bool
-    {
-        $len = strlen($startString);
-        return (substr($string, 0, $len) === $startString);
-    }
-
-    /**
      * Возвращает массив из нашего списка городов, но лишь тех городов, чьи ID переданы в параметре
      *
      * Выйдет массив каждый элемент которого одномерный массив с 3 элементами: abbreviation - 2 (г), city - 3 (Ялта), region - 4 (Респ Крым)
