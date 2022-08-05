@@ -34,16 +34,16 @@ class DpdCityList
      *
      * @return void
      */
-    public static function getCitiesJson(): void
+    public static function searchCitiesJson(): void
     {
         Log::info(Log::DPD_CITY_FIND, "Старт");
         $query = $_GET[CITY_SEARCH_KEY_NAME];
         Log::debug(Log::DPD_CITY_FIND, "От пользователя: $query");
 
         try {
-            $cityIds = self::getCityIds($query);
+            $cityIds = self::searchCitiesIds($query);
 
-            $returnArray = self::getCityArray($cityIds);
+            $returnArray = self::searchCitiesArray($cityIds);
             echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
         } catch (\Exception $e) {
             Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
@@ -230,7 +230,7 @@ class DpdCityList
      *
      * @return array Например: [100, 101234, ...
      */
-    private static function getCityIds(string $query): array
+    private static function searchCitiesIds(string $query): array
     {
 
         if (DPD_CITY_LIST_SAFE_MODE) { // В безопасном режиме используем только проверенные данные
@@ -252,6 +252,11 @@ class DpdCityList
         $returnArray = [];
 
         foreach ($cityList as $cityName => $cityIdsArray) {
+
+            // Перед сравнением - переводим в нижний регистр
+            $cityName = mb_strtolower($cityName);
+            $query = mb_strtolower($query);
+
             if (str_starts_with($cityName, $query)) {
                 $returnArray = array_merge($returnArray, $cityIdsArray);
             }
@@ -266,6 +271,19 @@ class DpdCityList
     }
 
     /**
+     * Function to check string starting  with given substring
+     *
+     * @param $string
+     * @param $startString
+     * @return bool
+     */
+    private static function startsWith (string $string, string $startString): bool
+    {
+        $len = strlen($startString);
+        return (substr($string, 0, $len) === $startString);
+    }
+
+    /**
      * Возвращает массив из нашего списка городов, но лишь тех городов, чьи ID переданы в параметре
      *
      * Выйдет массив каждый элемент которого одномерный массив с 3 элементами: abbreviation - 2 (г), city - 3 (Ялта), region - 4 (Респ Крым)
@@ -274,7 +292,7 @@ class DpdCityList
      *
      * @return array
      */
-    private static function getCityArray(array $cityIds): array
+    private static function searchCitiesArray(array $cityIds): array
     {
         if (DPD_CITY_LIST_SAFE_MODE) {  // В безопасном режиме используем только проверенные данные
             $input = file_get_contents(self::CITY_LIST_IDS_PATH_SAFE);

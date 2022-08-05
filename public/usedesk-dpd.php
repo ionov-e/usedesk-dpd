@@ -13,7 +13,7 @@ require_once "../config/global.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') { // Get-запросы
     if (!empty($_GET[CITY_SEARCH_KEY_NAME])) {
-        DpdCityList::getCitiesJson(); // Get-запрос: из формы при вводе в поле город
+        DpdCityList::searchCitiesJson(); // Get-запрос: из формы при вводе в поле город
     } else {
         UseDeskHandler::generateFormForOrder(); // Get-запрос: Переход на форму из HTML-блока (в Get: ticketID)
     }
