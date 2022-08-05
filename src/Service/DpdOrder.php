@@ -78,15 +78,13 @@ class DpdOrder
             return [];
         }
 
+        // Формирование массива для отправки
         $arData = array();
-
         $arData['auth'] = self::getAuthArray();
-
         $arData['order'] = array('orderNumberInternal' => $ttnArray[INTERNAL_JSON_KEY]);
-
         $arRequest['orderStatus'] = $arData; // помещаем запрос в orders
 
-        Log::debug(Log::UD_BLOCK, "Сформиловали массив для получения статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+        Log::debug(Log::UD_BLOCK, "Подготовлен массив для получения статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
         // IDE не подсказывает, но Soap может кидать SoapFault исключения
         $client = new \SoapClient (self::URL_ORDER);
