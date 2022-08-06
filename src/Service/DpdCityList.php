@@ -175,6 +175,10 @@ class DpdCityList
                 continue;
             }
 
+            if (str_starts_with($row[2], 'ж')) { // Пропускаем все ж/д станции (возможно придется вернуть) (783 на сейчас)
+                continue;
+            }
+
             $array1[$row[0]] = [$row[2], $row[3], $row[4]];
 
             $array2[$row[3]][] = $row[0];
