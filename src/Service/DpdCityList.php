@@ -167,7 +167,11 @@ class DpdCityList
 
         foreach ($rows as $row) {
 
-            if (!str_starts_with($row[1], 'RU')) {
+            if (!str_starts_with($row[1], 'RU')) { // Пропускаем все другие страны кроме РФ
+                continue;
+            }
+
+            if (str_starts_with($row[2], 'авто')) { // Пропускаем все автодороги (возможно придется вернуть) (114 всего лишь на сейчас)
                 continue;
             }
 
