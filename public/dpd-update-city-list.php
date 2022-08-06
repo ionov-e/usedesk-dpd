@@ -8,6 +8,6 @@ use App\Service\DpdCityList;
 require_once "../vendor/autoload.php";
 require_once "../config/global.php";
 
-DpdCityList::update();
+DpdCityList::updateDpdCityList();
 
 exit();

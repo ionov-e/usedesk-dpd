@@ -40,18 +40,19 @@ class DpdCityList
     {
         Log::info(Log::DPD_CITY_FIND, "Старт");
         $query = $_GET[CITY_SEARCH_KEY_NAME];
-        Log::debug(Log::DPD_CITY_FIND, "От пользователя: $query");
-
-//        try {
-//            $cityIds = self::searchCitiesIds($query);
-//
-//            $returnArray = self::searchCitiesArray($cityIds);
-//            echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
-//        } catch (\Exception $e) {
-//            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
-//        }
-        $dadataResponse = self::searchInDadata($query);
-        echo json_encode($dadataResponse, JSON_UNESCAPED_UNICODE);
+        Log::debug(Log::DPD_CITY_FIND, "Режим поиска: ". CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
+        try {
+            if (!CITY_LIST_SEARCH_MODE) { // Если режим не 0 - мы ищем не Dadata
+                $dadataResponse = self::searchInDadata($query);
+                echo json_encode($dadataResponse, JSON_UNESCAPED_UNICODE);
+            } else {  // Если режим > 0 - ищем в списке городов от DPD
+                $cityIds = self::searchCitiesIdsInDpdList($query);
+                $returnArray = self::searchCitiesArrayInDpdList($cityIds);
+                echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
+            }
+        } catch (\Exception $e) {
+            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
+        }
     }
 
     /**
@@ -59,12 +60,12 @@ class DpdCityList
      *
      * @return void
      */
-    public static function update(): void
+    public static function updateDpdCityList(): void
     {
 
         Log::info(Log::DPD_CITY_UPD, "Старт");
         try {
-            self::downloadCsvFromFtp();
+            self::downloadCsvFromDpdFtp();
             $jsons = self::csvToJson(self::CITY_LIST_ORIGINAL_PATH);
             self::saveJsons($jsons);
         } catch (\Exception $e) {
@@ -79,7 +80,7 @@ class DpdCityList
      *
      * @throws \Exception
      */
-    private static function downloadCsvFromFtp(): void
+    private static function downloadCsvFromDpdFtp(): void
     {
         $ftp = ftp_connect(FTP_SERVER); // установка соединения
 
@@ -183,10 +184,9 @@ class DpdCityList
                 continue;
             }
 
+            // Раскидываем данные в 2 массива. Подробнее о структуре в самом начале метода
             $array1[$row[0]] = [$row[2], $row[3], $row[4]];
-
             $array2[$row[3]][] = $row[0];
-
 
             $cityCount++; // Для лога
 
@@ -245,12 +245,12 @@ class DpdCityList
      *
      * @return array Например: [100, 101234, ...
      */
-    private static function searchCitiesIds(string $query): array
+    private static function searchCitiesIdsInDpdList(string $query): array
     {
 
-        if (DPD_CITY_LIST_SAFE_MODE) { // В безопасном режиме используем только проверенные данные
+        if (CITY_LIST_SEARCH_MODE === 1) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
             $file = self::CITY_LIST_CITIES_PATH_SAFE;
-        } else {
+        } else { // Использовать свежие сгенерированные данные из DPD
             $file = self::CITY_LIST_CITIES_PATH_NEW;
         }
 
@@ -294,17 +294,17 @@ class DpdCityList
      *
      * @return array
      */
-    private static function searchCitiesArray(array $cityIds): array
+    private static function searchCitiesArrayInDpdList(array $cityIds): array
     {
-        if (DPD_CITY_LIST_SAFE_MODE) {  // В безопасном режиме используем только проверенные данные
-            $input = file_get_contents(self::CITY_LIST_IDS_PATH_SAFE);
+        if (CITY_LIST_SEARCH_MODE === 1) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
+            $file = file_get_contents(self::CITY_LIST_IDS_PATH_SAFE);
         } else {
-            $input = file_get_contents(self::CITY_LIST_IDS_PATH_NEW);
+            $file = file_get_contents(self::CITY_LIST_IDS_PATH_NEW);
         }
 
-        mb_convert_encoding($input, "UTF-8", "auto");
+        mb_convert_encoding($file, "UTF-8", "auto");
 
-        $cityList = json_decode($input); // Возвращает StdClass
+        $cityList = json_decode($file); // Возвращает StdClass
 
         $returnArray = [];
 
@@ -320,49 +320,43 @@ class DpdCityList
         return $returnArray;
     }
 
+    /**
+     * Возврат массива с населенными пунктами, удовлетворяющими поисковому запросу используя сервис Dadata
+     *
+     * @param string $query
+     *
+     * @return array
+     */
     private static function searchInDadata(string $query): array
     {
         Log::debug(Log::DPD_CITY_FIND, "Поиск в Dadata: $query");
 
-        $dadata = new \Dadata\DadataClient(DADATA_API_KEY, null);
+        $dadataObject = new \Dadata\DadataClient(DADATA_API_KEY, null);
 
         $fields = array(
-            "locations" => [["country" => "Россия"]],
-            "from_bound" => ["value" => "city"],
+            "locations" => [["country" => "Россия"]],   // Ищем только в РФ
+            "from_bound" => ["value" => "city"],        // Эти 2 строки
             "to_bound" => ["value" => "settlement"],
             "restrict_value" => true
         );
 
-        $result = $dadata->suggest("address", $query, 5, $fields); #TODO self::MAX_CITY_COUNT_TO_RETURN
+        $dadataResponse = $dadataObject->suggest("address", $query, self::MAX_CITY_COUNT_TO_RETURN, $fields);
 
-        Log::debug(Log::DPD_CITY_FIND, "Вернули массив с " . json_encode($result, JSON_UNESCAPED_UNICODE));
-
-
-//        $result = json_decode($result);
-//        Log::debug(Log::DPD_CITY_FIND, "После конвертации: " . json_encode($result, JSON_UNESCAPED_UNICODE));
-        Log::debug(Log::DPD_CITY_FIND, gettype($result));
-        Log::debug(Log::DPD_CITY_FIND, count($result));
-
+        Log::debug(Log::DPD_CITY_FIND, "Вернули массив с " . json_encode($dadataResponse, JSON_UNESCAPED_UNICODE));
 
         $returnArray = []; // Итоговый массив
 
-        foreach ($result as $city) { // Собираем массив из городов, каждый элемент которого массив в виде: ["г", "Ялта", "Респ Крым"]
-            Log::debug(Log::DPD_CITY_FIND, "Смотрим массив с городом: " . json_encode($city, JSON_UNESCAPED_UNICODE));
-            Log::debug(Log::DPD_CITY_FIND, "Смотрим массив data: " . json_encode($city['data'], JSON_UNESCAPED_UNICODE));
+        foreach ($dadataResponse as $cityArray) { // Собираем массив из городов, каждый элемент которого массив в виде: ["г", "Ялта", "Респ Крым"]
 
-            $abbreviation = $city['data']['city_type'] ?? $city['data']['settlement_type'];
+            $abbreviation = $cityArray['data']['city_type'] ?? $cityArray['data']['settlement_type'];
             if (is_null($abbreviation)) {
                 Log::critical(Log::DPD_CITY_FIND, "В ответе от Dadata при поиске города не обнаружили тип нас. пункта");
+                break;
             }
-            Log::debug(Log::DPD_CITY_FIND, "abbreviation: $abbreviation");
-            $city = $city['data']['city'] ?? $city['data']['settlement'];
-            Log::debug(Log::DPD_CITY_FIND, "city: $city");
-            $region = $city['data']['region_with_type'];
-            Log::debug(Log::DPD_CITY_FIND, "region: $region");
+            $city = $cityArray['data']['city'] ?? $cityArray['data']['settlement'];
+            $region = $cityArray['data']['region_with_type'];
 
             $newArray = [$abbreviation, $city, $region];
-
-            Log::debug(Log::DPD_CITY_FIND, "Array города: " . json_encode($newArray, JSON_UNESCAPED_UNICODE));
 
             $returnArray[] = $newArray;
         }
