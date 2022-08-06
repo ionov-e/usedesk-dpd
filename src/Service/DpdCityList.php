@@ -148,12 +148,14 @@ class DpdCityList
         //      2) Используем элементы: id - 0 (4553454126), city - 3 (Ялта)
         //          Записываем: 3 => [0, 0, 0]   // 3 (city) - неуникален. А в значении - массив с уникальными ID
 
+
+        ini_set('memory_limit', -1); // Иначе при выполнении скрипта на текущем сервере выкидывает 500-ую. 134 МБ использовалось
+
         $array1 = array();
         $array2 = array();
 
         $cityCount = 0; // Используется лишь для лога
         $maxIdsForOneCityName = 0; // Используем для лога - узнать максимальное количество одинаково названных населенных пунктов
-
 
         $string = iconv('WINDOWS-1251', 'UTF-8', file_get_contents($csvPath)); // Получаем строку, конвертируем
 
@@ -191,7 +193,7 @@ class DpdCityList
     }
 
     /**
-     * Сохраняет полученные массивы
+     * Сохраняет полученные массивы с городами
      *
      * @param array $jsons
      *
@@ -199,26 +201,27 @@ class DpdCityList
      */
     private static function saveJsons(array $jsons): void
     {
-        $isError = false;
-
         // Проверяет создана ли соответствующая папка. Создает, если не существует
         if (!is_dir(self::LIST_FOLDER_NEW)) {
-            mkdir(self::LIST_FOLDER_NEW, 0770, true);
+            if (mkdir(self::LIST_FOLDER_NEW, 0770, true)) {
+                Log::warning(Log::DPD_CITY_UPD, "Впервые создали папку для обновленного списка городов");
+            } else {
+                Log::critical(Log::DPD_CITY_UPD, "Не получилось создать несуществующую еще папку для обновленного списка городов: "
+                    . self::LIST_FOLDER_NEW);
+            }
         }
 
         if (!file_put_contents(self::CITY_LIST_IDS_PATH_NEW, $jsons[0])) {
             Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_IDS_PATH_NEW);
-            $isError = true;
+            return;
         }
 
         if (!file_put_contents(self::CITY_LIST_CITIES_PATH_NEW, $jsons[1])) {
             Log::error(Log::DPD_CITY_UPD, "Не получилось сохранить файл: " . self::CITY_LIST_CITIES_PATH_NEW);
-            $isError = true;
+            return;
         }
 
-        if (!$isError) {
-            Log::info(Log::DPD_CITY_UPD, "Успешно сохранился обновленный список городов");
-        }
+        Log::info(Log::DPD_CITY_UPD, "Успешно сохранился обновленный список городов");
     }
 
     /**
