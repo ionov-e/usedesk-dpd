@@ -1,3 +1,18 @@
 .cursor-pointer {
     cursor: pointer;
 }
+
+.custom-form select.form-control {
+    color: black;
+    font-weight: 600;
+}
+
+.custom-form input {
+    font-weight: 600 !important;
+}
+
+.custom-form ::placeholder {
+    color: #979797 !important;
+    font-style: italic;
+    font-weight: 400 !important;
+}

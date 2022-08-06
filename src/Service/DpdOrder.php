@@ -130,23 +130,6 @@ class DpdOrder
 
         $form = $_POST;
 
-        // Начнем с необязательного поля. Если пришло пустое - может и нужно оставить пустым. Поэтому проверяем вместе с № дома
-        if (empty($form['receiverAddress']['houseKorpus']) && empty($form['receiverAddress']['house'])) {
-            $form['receiverAddress']['houseKorpus'] = '5';
-        }
-
-        $form['receiverAddress']['name'] = $form['receiverAddress']['name'] ?: 'ООО "ФИРМЕННЫЕ РЕШЕНИЯ"';
-        $form['receiverAddress']['contactFio'] = $form['receiverAddress']['contactFio'] ?: 'Сотрудник склада';
-        $form['receiverAddress']['contactPhone'] = $form['receiverAddress']['contactPhone'] ?: '244 68 04';
-        $form['receiverAddress']['city'] = $form['receiverAddress']['city'] ?: 'Петро-Славянка';
-        $form['receiverAddress']['region'] = $form['receiverAddress']['region'] ?: 'Санкт-Петербург';
-        $form['receiverAddress']['street'] = $form['receiverAddress']['street'] ?: 'Софийская';
-        $form['receiverAddress']['streetAbbr'] = $form['receiverAddress']['streetAbbr'] ?: 'ул';
-        $form['receiverAddress']['house'] = $form['receiverAddress']['house'] ?: '118';
-
-        $form['cargoNumPack'] = $form['cargoCategory'] ?: '1';
-        $form['cargoCategory'] = $form['cargoCategory'] ?: 'Товары';
-
         // Незаполненные необязательные поля будут содержать null. Избавимся от них
         foreach ($form as $element) {
             if (empty($element)) {
