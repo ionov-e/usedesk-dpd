@@ -13,6 +13,7 @@ try {
 define('CLIENT_NUMBER', $_ENV['CLIENT_NUMBER']);
 define('CLIENT_KEY', $_ENV['CLIENT_KEY']);
 define('URL_SCRIPT_ROOT', $_ENV['URL_SCRIPT_ROOT']);
+define('DADATA_API_KEY', $_ENV['DADATA_API_KEY']);
 define('URL_DPD_DOMAIN', $_ENV['URL_DPD_DOMAIN']);
 define('FTP_SERVER', $_ENV['FTP_SERVER']);
 define('FTP_USER', $_ENV['FTP_USER']);

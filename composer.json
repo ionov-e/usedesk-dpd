@@ -4,7 +4,8 @@
     "ext-soap": "*",
     "vlucas/phpdotenv": "*",
     "ext-iconv": "*",
-    "ext-ftp": "*"
+    "ext-ftp": "*",
+    "hflabs/dadata": "^22.3"
   },
   "autoload": {
     "psr-4": {

@@ -11,7 +11,9 @@ use App\Log;
 class DpdCityList
 {
 
+
     const MAX_CITY_COUNT_TO_RETURN = 15;  // Максимальное количество подходящих городов для возврата в форму создания ТТН
+    //Для Dadata можно установить максимальное количество от 5 до 20
 
     const LIST_FOLDER_NEW = DATA_FOLDER_ROOT . '/dpd-cities/';
     // Пути к JSON-файлам со списком городов
@@ -40,14 +42,16 @@ class DpdCityList
         $query = $_GET[CITY_SEARCH_KEY_NAME];
         Log::debug(Log::DPD_CITY_FIND, "От пользователя: $query");
 
-        try {
-            $cityIds = self::searchCitiesIds($query);
-
-            $returnArray = self::searchCitiesArray($cityIds);
-            echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
-        } catch (\Exception $e) {
-            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
-        }
+//        try {
+//            $cityIds = self::searchCitiesIds($query);
+//
+//            $returnArray = self::searchCitiesArray($cityIds);
+//            echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
+//        } catch (\Exception $e) {
+//            Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
+//        }
+        $dadataResponse = self::searchInDadata($query);
+        echo json_encode($dadataResponse, JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -316,4 +320,56 @@ class DpdCityList
         return $returnArray;
     }
 
+    private static function searchInDadata(string $query): array
+    {
+        Log::debug(Log::DPD_CITY_FIND, "Поиск в Dadata: $query");
+
+        $dadata = new \Dadata\DadataClient(DADATA_API_KEY, null);
+
+        $fields = array(
+            "locations" => [["country" => "Россия"]],
+            "from_bound" => ["value" => "city"],
+            "to_bound" => ["value" => "settlement"],
+            "restrict_value" => true
+        );
+
+        $result = $dadata->suggest("address", $query, 5, $fields); #TODO self::MAX_CITY_COUNT_TO_RETURN
+
+        Log::debug(Log::DPD_CITY_FIND, "Вернули массив с " . json_encode($result, JSON_UNESCAPED_UNICODE));
+
+
+//        $result = json_decode($result);
+//        Log::debug(Log::DPD_CITY_FIND, "После конвертации: " . json_encode($result, JSON_UNESCAPED_UNICODE));
+        Log::debug(Log::DPD_CITY_FIND, gettype($result));
+        Log::debug(Log::DPD_CITY_FIND, count($result));
+
+
+        $returnArray = []; // Итоговый массив
+
+        foreach ($result as $city) { // Собираем массив из городов, каждый элемент которого массив в виде: ["г", "Ялта", "Респ Крым"]
+            Log::debug(Log::DPD_CITY_FIND, "Смотрим массив с городом: " . json_encode($city, JSON_UNESCAPED_UNICODE));
+            Log::debug(Log::DPD_CITY_FIND, "Смотрим массив data: " . json_encode($city['data'], JSON_UNESCAPED_UNICODE));
+
+            $abbreviation = $city['data']['city_type'] ?? $city['data']['settlement_type'];
+            if (is_null($abbreviation)) {
+                Log::critical(Log::DPD_CITY_FIND, "В ответе от Dadata при поиске города не обнаружили тип нас. пункта");
+            }
+            Log::debug(Log::DPD_CITY_FIND, "abbreviation: $abbreviation");
+            $city = $city['data']['city'] ?? $city['data']['settlement'];
+            Log::debug(Log::DPD_CITY_FIND, "city: $city");
+            $region = $city['data']['region_with_type'];
+            Log::debug(Log::DPD_CITY_FIND, "region: $region");
+
+            $newArray = [$abbreviation, $city, $region];
+
+            Log::debug(Log::DPD_CITY_FIND, "Array города: " . json_encode($newArray, JSON_UNESCAPED_UNICODE));
+
+            $returnArray[] = $newArray;
+        }
+
+        Log::debug(Log::DPD_CITY_FIND, "Вернули массив: " . json_encode($returnArray, JSON_UNESCAPED_UNICODE));
+
+        Log::info(Log::DPD_CITY_FIND, "Вернули массив с кол-во городов: " . count($returnArray));
+        return $returnArray;
+    }
 }
