@@ -348,12 +348,12 @@ class DpdCityList
 
         foreach ($dadataResponse as $cityArray) { // Собираем массив из городов, каждый элемент которого массив в виде: ["г", "Ялта", "Респ Крым"]
 
-            $abbreviation = $cityArray['data']['city_type'] ?? $cityArray['data']['settlement_type'];
+            $abbreviation = $cityArray['data']['settlement_type'] ?? $cityArray['data']['city_district_type'] ?? $cityArray['data']['city_type'];
             if (is_null($abbreviation)) {
                 Log::critical(Log::DPD_CITY_FIND, "В ответе от Dadata при поиске города не обнаружили тип нас. пункта");
                 break;
             }
-            $city = $cityArray['data']['city'] ?? $cityArray['data']['settlement'];
+            $city = $cityArray['data']['settlement'] ?? $cityArray['data']['city_district'] ?? $cityArray['data']['city'];
             $region = $cityArray['data']['region_with_type'];
 
             $newArray = [$abbreviation, $city, $region];
