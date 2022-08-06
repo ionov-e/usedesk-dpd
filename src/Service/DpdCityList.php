@@ -308,6 +308,10 @@ class DpdCityList
             $returnArray[] = $cityList->$id;
         }
 
+        // Сортировка по алфавиту по типу населенного пункта
+        $cityType = array_column($returnArray, 0);
+        array_multisort($returnArray, SORT_ASC, $cityType);
+
         Log::debug(Log::DPD_CITY_FIND, "Вернули массив с " . count($returnArray));
         return $returnArray;
     }
