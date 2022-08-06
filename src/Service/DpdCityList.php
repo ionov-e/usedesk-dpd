@@ -40,7 +40,7 @@ class DpdCityList
     {
         Log::info(Log::DPD_CITY_FIND, "Старт");
         $query = $_GET[CITY_SEARCH_KEY_NAME];
-        Log::debug(Log::DPD_CITY_FIND, "Режим поиска: ". CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
+        Log::debug(Log::DPD_CITY_FIND, "Режим поиска: " . CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
         try {
             if (!CITY_LIST_SEARCH_MODE) { // Если режим не 0 - мы ищем не Dadata
                 $dadataResponse = self::searchInDadata($query);
@@ -190,10 +190,12 @@ class DpdCityList
 
             $cityCount++; // Для лога
 
-            if (count($array2[$row[3]]) > $maxIdsForOneCityName) {  // Для лога
-                $maxIdsForOneCityName = count($array2[$row[3]]);
-                if ($maxIdsForOneCityName == 300) {
-                    Log::debug(Log::DPD_CITY_UPD, "Нас. пункт встретился 300 раз: $row[3]");
+            if (!LOG_MIN_LEVEL) { // Для лога уровня DEBUG
+                if (count($array2[$row[3]]) > $maxIdsForOneCityName) {
+                    $maxIdsForOneCityName = count($array2[$row[3]]);
+                    if ($maxIdsForOneCityName == 300) {
+                        Log::debug(Log::DPD_CITY_UPD, "Нас. пункт встретился 300 раз: $row[3]");
+                    }
                 }
             }
         }

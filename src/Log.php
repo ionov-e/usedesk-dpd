@@ -39,22 +39,30 @@ class Log
 
     public static function debug(string $category, string $message): void
     {
-        self::getLogger()->logMsg('debug', $category, $message);
+        if (!LOG_MIN_LEVEL) {
+            self::getLogger()->logMsg('debug', $category, $message);
+        }
     }
 
     public static function info(string $category, string $message): void
     {
-        self::getLogger()->logMsg('info', $category, $message);
+        if (LOG_MIN_LEVEL <= 1 ) {
+            self::getLogger()->logMsg('info', $category, $message);
+        }
     }
 
     public static function warning(string $category, string $message): void
     {
-        self::getLogger()->logMsg('warning', $category, $message);
+        if (LOG_MIN_LEVEL <= 2) {
+            self::getLogger()->logMsg('warning', $category, $message);
+        }
     }
 
     public static function error(string $category, string $message): void
     {
-        self::getLogger()->logMsg('error', $category, $message);
+        if (LOG_MIN_LEVEL <= 3) {
+            self::getLogger()->logMsg('error', $category, $message);
+        }
     }
 
     public static function critical(string $category, string $message): void
