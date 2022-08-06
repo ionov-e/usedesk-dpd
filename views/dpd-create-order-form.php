@@ -249,60 +249,33 @@ $modifyDays = 1;
 
         <script>
             document.querySelector('#senderCityFront').addEventListener('keyup', searching);
-
-            function searching(e) {
-                let keywordsStr = e.target.value;
-                if (keywordsStr.length < 3) {
-                    return;
-                }
-                fetch('<?= INDEX_FILE_USEDESK ?>?<?= CITY_SEARCH_KEY_NAME ?>=' + encodeURI(keywordsStr))
-                    .then((response) => response.json())
-                    .then((data) => {
-
-                        let previousDiv = document.querySelector('#senderCityList');
-                        if (previousDiv) {
-                            previousDiv.remove();
-                        }
-
-                        let newDiv = document.createElement('div');
-                        document.querySelector('#senderCityListParent').appendChild(newDiv);
-
-                        let header = document.createElement('h5');
-                        header.append("Выберите из списка:")
-                        newDiv.appendChild(header);
-
-                        let newUl = document.createElement('ul');
-                        newUl.setAttribute('class', 'list-group');
-                        newDiv.setAttribute('id', 'senderCityList');
-                        newDiv.appendChild(newUl);
-
-                        data.forEach(createAForSenderCity);
-                    });
-            }
-
-            function createAForSenderCity(cityArray) {
-                console.log(cityArray);
-                let newA = document.createElement('a');
-                newA.setAttribute('class', 'list-group-item list-group-item-action cursor-pointer');
-                newA.dataset.abrv = cityArray[0];
-                newA.dataset.city = cityArray[1];
-                newA.dataset.region = cityArray[2];
-                newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
-                document.querySelector('#senderCityList').appendChild(newA);
-                newA.addEventListener('click', function () {
-                    document.querySelector('#senderCityFront').value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
-                    document.querySelector('#senderCity').value = this.dataset.city;
-                    document.querySelector('#senderRegion').value = this.dataset.region;
-                    document.querySelector('#senderCityList').remove();
-                });
-            }
-        </script>
-
-        <script>
             document.querySelector('#receiverCityFront').addEventListener('keyup', searching);
 
             function searching(e) {
                 let keywordsStr = e.target.value;
+
+
+                let ids = {};
+
+                if (e.target.id === 'senderCityFront') {
+                    ids = {
+                        'City': 'senderCity',
+                        'CityFront': 'senderCityFront',
+                        'CityList': 'senderCityList',
+                        'CityListParent': 'senderCityListParent',
+                        'Region': 'senderRegion'
+                    };
+                }
+                if (e.target.id === 'receiverCityFront') {
+                    ids = {
+                        'City': 'receiverCity',
+                        'CityFront': 'receiverCityFront',
+                        'CityList': 'receiverCityList',
+                        'CityListParent': 'receiverCityListParent',
+                        'Region': 'receiverRegion'
+                    };
+                }
+
                 if (keywordsStr.length < 3) {
                     return;
                 }
@@ -310,13 +283,13 @@ $modifyDays = 1;
                     .then((response) => response.json())
                     .then((data) => {
 
-                        let previousDiv = document.querySelector('#receiverCityList');
+                        let previousDiv = document.querySelector(`#${ids.CityList}`);
                         if (previousDiv) {
                             previousDiv.remove();
                         }
 
                         let newDiv = document.createElement('div');
-                        document.querySelector('#receiverCityListParent').appendChild(newDiv);
+                        document.querySelector(`#${ids.CityListParent}`).appendChild(newDiv);
 
                         let header = document.createElement('h5');
                         header.append("Выберите из списка:")
@@ -324,30 +297,27 @@ $modifyDays = 1;
 
                         let newUl = document.createElement('ul');
                         newUl.setAttribute('class', 'list-group');
-                        newDiv.setAttribute('id', 'receiverCityList');
+                        newDiv.setAttribute('id', `${ids.CityList}`);
                         newDiv.appendChild(newUl);
 
-                        data.forEach(createAForReceiverCity);
+                        data.forEach((cityArray) => {
+                                let newA = document.createElement('a');
+                                newA.setAttribute('class', 'list-group-item list-group-item-action cursor-pointer');
+                                newA.dataset.abrv = cityArray[0];
+                                newA.dataset.city = cityArray[1];
+                                newA.dataset.region = cityArray[2];
+                                newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
+                                document.querySelector(`#${ids.CityList}`).appendChild(newA);
+                                newA.addEventListener('click', function () {
+                                    document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
+                                    document.querySelector(`#${ids.City}`).value = this.dataset.city;
+                                    document.querySelector(`#${ids.Region}`).value = this.dataset.region;
+                                    document.querySelector(`#${ids.CityList}`).remove();
+                                });
+                            }
+                        );
                     });
             }
-
-            function createAForReceiverCity(cityArray) {
-                console.log(cityArray);
-                let newA = document.createElement('a');
-                newA.setAttribute('class', 'list-group-item list-group-item-action cursor-pointer');
-                newA.dataset.abrv = cityArray[0];
-                newA.dataset.city = cityArray[1];
-                newA.dataset.region = cityArray[2];
-                newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
-                document.querySelector('#receiverCityList').appendChild(newA);
-                newA.addEventListener('click', function () {
-                    document.querySelector('#receiverCityFront').value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
-                    document.querySelector('#receiverCity').value = this.dataset.city;
-                    document.querySelector('#receiverRegion').value = this.dataset.region;
-                    document.querySelector('#receiverCityList').remove();
-                });
-            }
-
         </script>
     </body>
 </html>
