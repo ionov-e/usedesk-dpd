@@ -11,131 +11,140 @@ $modifyDays = 1;
 <html lang="ru">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>DPD Создание ТТН</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+              crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+                crossorigin="anonymous"></script>
         <link rel="stylesheet" href="/assets/css/style.css">
     </head>
     <body>
         <div class="container">
             <h1 class="text-center">Оформление заказа на доставку DPD</h1>
             <h4>Отправка произведется по тарифу DPD OPTIMUM. Вид доставки Двери-Двери</h4>
-            <form action="" method="post" class="was-validated custom-form" enctype="multipart/form-data">
+            <form action="" method="post" class="was-validated custom-form">
                 <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $ticketId ?>">
-                <div class="form-group">
-                    <label for="senderAddress[datePickup]"><strong>*</strong> Дата планируемой отгрузки:</label>
+                <div class="mb-3">
+                    <label class="form-label" for="senderAddress[datePickup]"><strong>*</strong> Дата планируемой
+                        отгрузки:</label>
                     <input type="date"
                            min="<?= $minDate = (new DateTime())->modify("+ {$modifyDays} days")->format("Y-m-d") ?>"
                            class="form-control" placeholder="Выберите дату отгрузки" name="senderAddress[datePickup]"
                            id="senderAddress[datePickup]" value="<?= $minDate ?>" required>
                     <div id="my-listen-invalid" class="invalid-feedback">Обязательно для заполнения.</div>
                 </div>
-                <div class="form-group">
-                    <label for="senderAddress[pickupTimePeriod]"><strong>*</strong> Интервалы времени приёма</label>
-                    <select name="senderAddress[pickupTimePeriod]" id="senderAddress[pickupTimePeriod]"
-                            class="form-control">
+                <div class="mb-3">
+                    <label class="form-label" for="senderAddress[pickupTimePeriod]"><strong>*</strong> Интервалы времени
+                        приёма</label>
+                    <select class="form-select" name="senderAddress[pickupTimePeriod]"
+                            id="senderAddress[pickupTimePeriod]">
                         <option>9-18</option>
                         <option>9-13</option>
                         <option>13-18</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (до 20
+                <div class="mb-3">
+                    <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (до
+                        20
                         символов)</label>
                     <input name="orderNumberInternal" id="orderNumberInternal" placeholder="220620-12312" type="text"
                            class="form-control" required>
+                    <div class="invalid-feedback">Должно быть не больше 20 символов</div>
                 </div>
-                <div class="form-group">
-                    <label for="cargoNumPack"><strong>*</strong> Количество посылок в отправке</label>
+                <div class="mb-3">
+                    <label class="form-label" for="cargoNumPack"><strong>*</strong> Количество посылок в
+                        отправке</label>
                     <input name="cargoNumPack" id="cargoNumPack" value="1" type="text" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label for="cargoWeight"><strong>*</strong> Вес посылки (в кг)</label>
+                <div class="mb-3">
+                    <label class="form-label" for="cargoWeight"><strong>*</strong> Вес посылки (в кг)</label>
                     <input name="cargoWeight" id="cargoWeight" placeholder="60" type="text" class="form-control"
                            required>
                 </div>
-                <div class="form-group">
-                    <label for="cargoVolume"><strong>*</strong> Объем посылки (в метрах кубических)</label>
+                <div class="mb-3">
+                    <label class="form-label" for="cargoVolume"><strong>*</strong> Объем посылки (в метрах
+                        кубических)</label>
                     <input name="cargoVolume" id="cargoVolume" placeholder="5" type="text" class="form-control"
                            required>
                 </div>
-                <div class="form-group">
-                    <label for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
+                <div class="mb-3">
+                    <label class="form-label" for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
                     <input name="cargoValue" id="cargoValue" placeholder="60000" type="text" class="form-control"
                            required>
                 </div>
-                <div class="form-group">
-                    <label for="cargoCategory"><strong>*</strong> Категория содержимого</label>
+                <div class="mb-3">
+                    <label class="form-label" for="cargoCategory"><strong>*</strong> Категория содержимого</label>
                     <input name="cargoCategory" id="cargoCategory" value="Товары" type="text" class="form-control">
                 </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
                         <h5>Отправитель</h5>
                     </div>
-                    <div class="form-group col-md-6">
+                    <div class="col-md-6">
                         <h5>Получатель</h5>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[name]"><strong>*</strong> Имя/Название организации</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[name]"><strong>*</strong> Имя/Название организации</label>
                         <input name="senderAddress[name]" id="senderAddress[name]" placeholder="Илья Отправитель"
                                type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[name]"><strong>*</strong> Имя/Название организации </label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[name]"><strong>*</strong> Имя/Название
+                            организации </label>
                         <input name="receiverAddress[name]" id="receiverAddress[name]" value="ООО 'ФИРМЕННЫЕ РЕШЕНИЯ'"
                                type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[contactFio]"><strong>*</strong> ФИО</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[contactFio]"><strong>*</strong> ФИО</label>
                         <input name="senderAddress[contactFio]" id="senderAddress[contactFio]"
                                placeholder="Смирнов Игорь Николаевич" type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[contactFio]"><strong>*</strong> ФИО</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[contactFio]"><strong>*</strong> ФИО</label>
                         <input name="receiverAddress[contactFio]" id="receiverAddress[contactFio]"
                                value="Сотрудник склада" type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[contactPhone]"><strong>*</strong> Контактный телефон</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[contactPhone]"><strong>*</strong> Контактный
+                            телефон</label>
                         <input name="senderAddress[contactPhone]" id="senderAddress[contactPhone]"
                                placeholder="89165555555" type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[contactPhone]"><strong>*</strong> Контактный телефон</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[contactPhone]"><strong>*</strong> Контактный
+                            телефон</label>
                         <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]" value="244 68 04"
                                type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[index]">Почтовый индекс</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[index]">Почтовый индекс</label>
                         <input name="senderAddress[index]" id="senderAddress[index]" placeholder="103426" type="text"
                                class="form-control">
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[index]">Почтовый индекс</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[index]">Почтовый индекс</label>
                         <input name="receiverAddress[index]" id="receiverAddress[index]" placeholder="196642"
                                type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col" id="senderCityListParent">
-                        <label for="senderCityFront"><strong>*</strong> Населенный пункт</label>
+                <div class="row">
+                    <div class="col" id="senderCityListParent">
+                        <label class="form-label" for="senderCityFront"><strong>*</strong> Населенный пункт</label>
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col" id="receiverCityListParent">
-                        <label for="receiverCityFront"><strong>*</strong> Город</label>
+                    <div class="col" id="receiverCityListParent">
+                        <label class="form-label" for="receiverCityFront"><strong>*</strong> Город</label>
                         <input id="receiverCityFront" value="Петро-Славянка" type="text" class="form-control">
                     </div>
                 </div>
@@ -145,91 +154,94 @@ $modifyDays = 1;
                        class="form-control">
                 <input hidden name="receiverAddress[region]" id="receiverRegion" value="г Санкт-Петербург" type="text"
                        class="form-control">
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[street]"><strong>*</strong> Наименование улицы</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[street]"><strong>*</strong> Наименование
+                            улицы</label>
                         <input id="senderAddress[street]" name="senderAddress[street]" placeholder="Авиаторов"
                                type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[street]"><strong>*</strong> Наименование улицы</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[street]"><strong>*</strong> Наименование
+                            улицы</label>
                         <input name="receiverAddress[street]" id="receiverAddress[street]" value="Софийская" type="text"
                                class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[streetAbbr]"><strong>*</strong> Аббревиатура улицы</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[streetAbbr]"><strong>*</strong> Аббревиатура улицы</label>
                         <input name="senderAddress[streetAbbr]" id="senderAddress[streetAbbr]" placeholder="ул"
                                type="text" class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[streetAbbr]"><strong>*</strong> Аббревиатура улицы</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[streetAbbr]"><strong>*</strong> Аббревиатура
+                            улицы</label>
                         <input name="receiverAddress[streetAbbr]" id="receiverAddress[streetAbbr]" value="ул"
                                type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[house]"><strong>*</strong> Номер дома</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[house]"><strong>*</strong> Номер дома</label>
                         <input name="senderAddress[house]" id="senderAddress[house]" placeholder="1" type="text"
                                class="form-control" required>
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[house]"><strong>*</strong> Номер дома</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[house]"><strong>*</strong> Номер дома</label>
                         <input name="receiverAddress[house]" id="receiverAddress[house]" value="118" type="text"
                                class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[houseKorpus]">Корпус</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[houseKorpus]">Корпус</label>
                         <input name="senderAddress[houseKorpus]" id="senderAddress[houseKorpus]" placeholder=""
                                type="text" class="form-control">
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[houseKorpus]">Корпус</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[houseKorpus]">Корпус</label>
                         <input name="receiverAddress[houseKorpus]" id="receiverAddress[houseKorpus]" value="5"
                                type="text" class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[str]">Строение</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[str]">Строение</label>
                         <input name="senderAddress[str]" id="senderAddress[str]" placeholder="" type="text"
                                class="form-control">
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[str]">Строение</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[str]">Строение</label>
                         <input name="receiverAddress[str]" id="receiverAddress[str]" placeholder="" type="text"
                                class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[office]">Офис </label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[office]">Офис </label>
                         <input name="senderAddress[office]" id="senderAddress[office]" placeholder="" type="text"
                                class="form-control">
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[office]">Офис </label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[office]">Офис </label>
                         <input name="receiverAddress[office]" id="receiverAddress[office]" placeholder="" type="text"
                                class="form-control">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col">
-                        <label for="senderAddress[flat]">Квартира</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[flat]">Квартира</label>
                         <input name="senderAddress[flat]" id="senderAddress[flat]" placeholder="" type="text"
                                class="form-control">
                     </div>
-                    <div class="form-group col">
-                        <label for="receiverAddress[flat]">Квартира</label>
+                    <div class="col">
+                        <label class="form-label" for="receiverAddress[flat]">Квартира</label>
                         <input name="receiverAddress[flat]" id="receiverAddress[flat]" placeholder="" type="text"
                                class="form-control">
                     </div>
                 </div>
-                <button id="my-listen-btn-submit" type="submit" name="submit" class="btn btn-primary my-btn-listen">
+                <button id="my-listen-btn-submit" type="submit" name="submit" class="btn btn-primary">
                     Отправить
                 </button>
             </form>
@@ -335,6 +347,7 @@ $modifyDays = 1;
                     document.querySelector('#receiverCityList').remove();
                 });
             }
+
         </script>
     </body>
 </html>

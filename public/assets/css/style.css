@@ -16,3 +16,11 @@
     font-style: italic;
     font-weight: 400 !important;
 }
+
+.custom-form .row label {
+    padding-top: 20px;
+}
+
+.custom-form button {
+    margin-top: 10px !important;
+}
