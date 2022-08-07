@@ -21,6 +21,9 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
+<img src="https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0" alt="Alt text" title="Optional title">
+<img src = “https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0” >
+
   ![Динамический блок: нет ТТН](https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0)
 
 - **Если уже создана ТТН, осуществив оформление в предыдущем пункте:**
@@ -28,7 +31,7 @@
   Отображение актуального статуса оформления ТТН или содержимое из прошлого пункта (если заказ был отменен DPD по
   каким-либо причинам)
 
-  ![Динамический блок: Статус ТТН DPD - OK](https://www.dropbox.com/s/6a54ozzz3oanqj4/usedesk-block-1.png?dl=0)
+  ![My Remote Image](https://www.dropbox.com/s/6a54ozzz3oanqj4/usedesk-block-1.png?dl=0)
   ![Динамический блок: Статус ТТН DPD - Pending](https://www.dropbox.com/s/v7idenbdt82uzux/usedesk-block-2.png?dl=0)
 
 При открытии страницы тикета - запрос успевает отсылаться сразу на DPD, и вернуть статус заказа для перепроверки на
