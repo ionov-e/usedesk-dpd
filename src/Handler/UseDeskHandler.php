@@ -16,7 +16,7 @@ class UseDeskHandler
      */
     public static function generateUsedeskBlockHtml(): void
     {
-        Log::info(Log::UD_BLOCK, 'Старт');
+        Log::info(Log::UD_BLOCK, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
 
         header("Content-Type: application/json");
         try {
@@ -38,7 +38,7 @@ class UseDeskHandler
      */
     public static function createDpdOrder(): void
     {
-        Log::info(Log::DPD_ORDER, 'Старт');
+        Log::info(Log::DPD_ORDER, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
         try {
             echo DpdOrder::createOrder();
         } catch (\SoapFault $e) {
@@ -55,7 +55,7 @@ class UseDeskHandler
      */
     public static function generateFormForOrder(): void
     {
-        Log::info(Log::DPD_FORM, 'Старт');
+        Log::info(Log::DPD_FORM, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
 
         // Прекращаем выполнение, если айди тикета из адресной строки не найден
         if (empty($ticketId = $_GET[TICKET_ID_KEY_NAME])) {

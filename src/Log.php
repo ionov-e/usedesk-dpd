@@ -14,10 +14,6 @@ class Log
     const DPD_ORDER = 'dpd_order';
     const UD_BLOCK = 'ud_block';
 
-
-    #TODO Минимальный уровень имплементировать
-    #TODO IP возможно добавить откуда запрос
-
     protected static $instance = null;
 
     private function __construct()

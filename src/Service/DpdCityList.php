@@ -38,7 +38,7 @@ class DpdCityList
      */
     public static function searchCitiesJson(): void
     {
-        Log::info(Log::DPD_CITY_FIND, "Старт");
+        Log::info(Log::DPD_CITY_FIND, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
         $query = rtrim(ltrim($_GET[CITY_SEARCH_KEY_NAME])); // Обрезаем с обеих сторон запроса пробелы
         Log::debug(Log::DPD_CITY_FIND, "Режим поиска: " . CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
         try {
@@ -63,7 +63,7 @@ class DpdCityList
     public static function updateDpdCityList(): void
     {
 
-        Log::info(Log::DPD_CITY_UPD, "Старт");
+        Log::info(Log::DPD_CITY_UPD, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
         try {
             self::downloadCsvFromDpdFtp();
             $jsons = self::csvToJson(self::CITY_LIST_ORIGINAL_PATH);
