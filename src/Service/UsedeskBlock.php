@@ -12,6 +12,7 @@ class UsedeskBlock
 {
     const UD_BLOCK_NEW_VIEW = PROJECT_DIR . '/views/ud-block-new.php';
     const UD_BLOCK_OK = PROJECT_DIR . '/views/ud-block-ok.php';
+    const UD_BLOCK_PENDING = PROJECT_DIR . '/views/ud-block-pending.php';
 
     /**
      * Возвращает ID Тикета, если находит внутри Post-запроса
@@ -63,7 +64,7 @@ class UsedeskBlock
         if ($ttnArray[STATE_JSON_KEY] == 'OK') {  // Случай, если ТТН со статусом ОК
             return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
         } elseif ($ttnArray[STATE_JSON_KEY] == 'OrderPending') {  // Случай: OrderPending. Номер не ТТН, а внутренний передается
-            return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_PENDING, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY]]);
         }
         // Случай, если ТТН не создано для тикета
         return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId]);
