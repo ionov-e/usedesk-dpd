@@ -96,7 +96,7 @@ class DB
 
         // Если нашли в БД Тикет
         if (!empty($dataArrays[$ticketId])) {
-            Log::info($logCategory, "Вернули из БД тикет $ticketId с содержимым: " . json_encode($dataArrays[$ticketId]));
+            Log::info($logCategory, "Вернули из БД тикет $ticketId с содержимым: " . json_encode($dataArrays[$ticketId], JSON_UNESCAPED_UNICODE));
             return $dataArrays[$ticketId];
         }
 

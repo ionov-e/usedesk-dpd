@@ -190,7 +190,7 @@ class DpdCityList
 
             $cityCount++; // Для лога
 
-            if (!LOG_MIN_LEVEL) { // Для лога уровня DEBUG
+            if (!LOG_MIN_LEVEL) { // Только для лога уровня DEBUG
                 if (count($array2[$row[3]]) > $maxIdsForOneCityName) {
                     $maxIdsForOneCityName = count($array2[$row[3]]);
                     if ($maxIdsForOneCityName == 300) {
@@ -201,7 +201,7 @@ class DpdCityList
         }
 
         Log::info(Log::DPD_CITY_UPD, "Из CSV забрали городов РФ: $cityCount");
-        Log::info(Log::DPD_CITY_UPD, "Название одного города повторялось максимально $maxIdsForOneCityName раз");
+        Log::debug(Log::DPD_CITY_UPD, "Название одного города повторялось максимально $maxIdsForOneCityName раз");
 
         return [json_encode($array1, JSON_UNESCAPED_UNICODE), json_encode($array2, JSON_UNESCAPED_UNICODE)];
     }

@@ -85,7 +85,7 @@ class UsedeskBlock
         $var = ob_get_contents();
         ob_end_clean();
         if (empty($var)) {
-            Log::critical(Log::UD_BLOCK, "Не вышло отрендерить файл: $path с аргументами: " . json_encode($args));
+            Log::critical(Log::UD_BLOCK, "Не вышло отрендерить файл: $path с аргументами: " . json_encode($args, JSON_UNESCAPED_UNICODE));
         }
         return $var;
     }
