@@ -47,32 +47,31 @@ $modifyDays = 1;
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (до
-                        20
-                        символов)</label>
+                    <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (не
+                        больше 20 символов)</label>
                     <input name="orderNumberInternal" id="orderNumberInternal" placeholder="220620-12312" type="text"
-                           class="form-control" required>
+                           maxlength="20" class="form-control" required>
                     <div class="invalid-feedback">Должно быть не больше 20 символов</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoNumPack"><strong>*</strong> Количество посылок в
                         отправке</label>
-                    <input name="cargoNumPack" id="cargoNumPack" value="1" type="text" class="form-control">
+                    <input name="cargoNumPack" id="cargoNumPack" value="1" type="number" min="1" class="form-control">
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoWeight"><strong>*</strong> Вес посылки (в кг)</label>
-                    <input name="cargoWeight" id="cargoWeight" placeholder="60" type="text" class="form-control"
+                    <input name="cargoWeight" id="cargoWeight" placeholder="60" type="number" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoVolume"><strong>*</strong> Объем посылки (в метрах
                         кубических)</label>
-                    <input name="cargoVolume" id="cargoVolume" placeholder="5" type="text" class="form-control"
+                    <input name="cargoVolume" id="cargoVolume" placeholder="5" type="number" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
-                    <input name="cargoValue" id="cargoValue" placeholder="60000" type="text" class="form-control"
+                    <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
@@ -117,25 +116,25 @@ $modifyDays = 1;
                         <label class="form-label" for="senderAddress[contactPhone]"><strong>*</strong> Контактный
                             телефон</label>
                         <input name="senderAddress[contactPhone]" id="senderAddress[contactPhone]"
-                               placeholder="89165555555" type="text" class="form-control" required>
+                               placeholder="89165555555" type="tel" class="form-control" required>
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[contactPhone]"><strong>*</strong> Контактный
                             телефон</label>
                         <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]" value="244 68 04"
-                               type="text" class="form-control">
+                               type="tel" class="form-control">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[index]">Почтовый индекс</label>
-                        <input name="senderAddress[index]" id="senderAddress[index]" placeholder="103426" type="text"
+                        <input name="senderAddress[index]" id="senderAddress[index]" placeholder="103426" type="number"
                                class="form-control">
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[index]">Почтовый индекс</label>
                         <input name="receiverAddress[index]" id="receiverAddress[index]" placeholder="196642"
-                               type="text" class="form-control">
+                               type="number" class="form-control">
                     </div>
                 </div>
                 <div class="row">
