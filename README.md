@@ -21,20 +21,15 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
-  ![Динамический блок: нет ТТН](/docs/images/usedesk-block-0.png)
- 
-
-<img src="/docs/images/usedesk-block-0.png" width="600">
-<img src="/docs/images/usedesk-block-0.png" width="100" height="100">
-<img src="https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0" width="100" height="100">
+<img src="/docs/images/usedesk-block-0.png" width="200">
 
 - **Если уже создана ТТН, осуществив оформление в предыдущем пункте:**
 
   Отображение актуального статуса оформления ТТН или содержимое из прошлого пункта (если заказ был отменен DPD по
   каким-либо причинам)
 
-  ![My Remote Image](/docs/images/usedesk-block-1.png)
-  ![Динамический блок: Статус ТТН DPD - Pending](/docs/images/usedesk-block-2.png)
+<img src="/docs/images/usedesk-block-1.png" width="200">
+<img src="/docs/images/usedesk-block-2.png" width="200">
 
 При открытии страницы тикета - запрос успевает отсылаться сразу на DPD, и вернуть статус заказа для перепроверки на
 всякий случай. Т.е. пользователь видит актуальную информацию. Выходит, что пользователь либо увидит зеленый блок с
@@ -45,7 +40,7 @@
 
 От пользователя требуется заполнить все необходимые поля (помечены звездочке в начале заголовка).
 
-![Форма создания заказа DPD](/docs/images/usedesk-dpd-form.png)
+<img src="/docs/images/usedesk-dpd-form.png" width="200">
 
 **Особенности:**
 
@@ -133,7 +128,7 @@
 1. Авторизуемся в Usedesk
 2. Переходим на [страницу Блоки](https://secure.usedesk.ru/settings/blocks)
 
-   ![Подключение в UseDesk Динамического Блока](/docs/images/usedesk-blocks.png)
+   <img src="/docs/images/usedesk-blocks.png" width="200">
 4. Убеждаемся, что среди списка предложенных уже нет созданного блока для доставки DPD
 5. Нажимаем на кнопку "Добавить динамический блок"
 6. Заполняем поля:
