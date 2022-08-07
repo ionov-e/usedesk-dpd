@@ -253,7 +253,6 @@ $modifyDays = 1;
             function searching(e) {
                 let keywordsStr = e.target.value;
 
-
                 let ids = {};
 
                 if (e.target.id === 'senderCityFront') {
@@ -274,6 +273,8 @@ $modifyDays = 1;
                         'Region': 'receiverRegion'
                     };
                 }
+
+                document.querySelector(`#${ids.CityFront}`).setCustomValidity("Not valid");
 
                 if (keywordsStr.length < 3) {
                     return;
@@ -315,6 +316,7 @@ $modifyDays = 1;
                                     document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
                                     document.querySelector(`#${ids.City}`).value = this.dataset.city;
                                     document.querySelector(`#${ids.Region}`).value = this.dataset.region;
+                                    document.querySelector(`#${ids.CityFront}`).setCustomValidity("");
                                     document.querySelector(`#${ids.CityList}`).remove();
                                 });
                             }
