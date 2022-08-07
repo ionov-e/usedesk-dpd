@@ -287,7 +287,12 @@ $modifyDays = 1;
                             previousDiv.remove();
                         }
 
+                        if (data.length === 0) {
+                            return;
+                        }
+
                         let newDiv = document.createElement('div');
+                        newDiv.setAttribute('id', `${ids.CityList}`);
                         document.querySelector(`#${ids.CityListParent}`).appendChild(newDiv);
 
                         let header = document.createElement('h5');
@@ -296,7 +301,6 @@ $modifyDays = 1;
 
                         let newUl = document.createElement('ul');
                         newUl.setAttribute('class', 'list-group');
-                        newDiv.setAttribute('id', `${ids.CityList}`);
                         newDiv.appendChild(newUl);
 
                         data.forEach((cityArray) => {
