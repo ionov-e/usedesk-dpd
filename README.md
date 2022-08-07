@@ -21,18 +21,20 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
-<img src="https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0" alt="Alt text" title="Optional title">
-<img src = “https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0” >
+  ![Динамический блок: нет ТТН](/docs/images/usedesk-block-0.png)
+ 
 
-  ![Динамический блок: нет ТТН](https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0)
+<img src="/docs/images/usedesk-block-0.png" width="600">
+<img src="/docs/images/usedesk-block-0.png" width="100" height="100">
+<img src="https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0" width="100" height="100">
 
 - **Если уже создана ТТН, осуществив оформление в предыдущем пункте:**
 
   Отображение актуального статуса оформления ТТН или содержимое из прошлого пункта (если заказ был отменен DPD по
   каким-либо причинам)
 
-  ![My Remote Image](https://www.dropbox.com/s/6a54ozzz3oanqj4/usedesk-block-1.png?dl=0)
-  ![Динамический блок: Статус ТТН DPD - Pending](https://www.dropbox.com/s/v7idenbdt82uzux/usedesk-block-2.png?dl=0)
+  ![My Remote Image](/docs/images/usedesk-block-1.png)
+  ![Динамический блок: Статус ТТН DPD - Pending](/docs/images/usedesk-block-2.png)
 
 При открытии страницы тикета - запрос успевает отсылаться сразу на DPD, и вернуть статус заказа для перепроверки на
 всякий случай. Т.е. пользователь видит актуальную информацию. Выходит, что пользователь либо увидит зеленый блок с
@@ -43,7 +45,7 @@
 
 От пользователя требуется заполнить все необходимые поля (помечены звездочке в начале заголовка).
 
-![Форма создания заказа DPD](https://www.dropbox.com/s/u50dsiriocv8m4w/usedesk-dpd-form.png?dl=0)
+![Форма создания заказа DPD](/docs/images/usedesk-dpd-form.png)
 
 **Особенности:**
 
@@ -131,7 +133,7 @@
 1. Авторизуемся в Usedesk
 2. Переходим на [страницу Блоки](https://secure.usedesk.ru/settings/blocks)
 
-   ![Подключение в UseDesk Динамического Блока](https://www.dropbox.com/s/7i66wuej7d8n1dh/usedesk-blocks.png?dl=0)
+   ![Подключение в UseDesk Динамического Блока](/docs/images/usedesk-blocks.png)
 4. Убеждаемся, что среди списка предложенных уже нет созданного блока для доставки DPD
 5. Нажимаем на кнопку "Добавить динамический блок"
 6. Заполняем поля:
