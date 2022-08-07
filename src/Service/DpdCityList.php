@@ -39,7 +39,7 @@ class DpdCityList
     public static function searchCitiesJson(): void
     {
         Log::info(Log::DPD_CITY_FIND, "Старт");
-        $query = $_GET[CITY_SEARCH_KEY_NAME];
+        $query = rtrim(ltrim($_GET[CITY_SEARCH_KEY_NAME])); // Обрезаем с обеих сторон запроса пробелы
         Log::debug(Log::DPD_CITY_FIND, "Режим поиска: " . CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
         try {
             if (!CITY_LIST_SEARCH_MODE) { // Если режим не 0 - мы ищем не Dadata
