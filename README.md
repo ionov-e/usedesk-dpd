@@ -21,6 +21,7 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
+![This is an image](https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0)
 <img src="https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0" alt="Alt text" title="Optional title">
 <img src = “https://www.dropbox.com/s/khc0c8v3n4wp709/usedesk-block-0.png?dl=0” >
 
