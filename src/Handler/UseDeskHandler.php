@@ -66,6 +66,6 @@ class UseDeskHandler
 
         Log::info(Log::DPD_FORM, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
 
-        echo require PROJECT_DIR . "/views/dpd-create-order-form.php"; // Тут используется переменная $ticketId
+        require PROJECT_DIR . "/views/dpd-create-order-form.php"; // Тут используется переменная $ticketId
     }
 }
