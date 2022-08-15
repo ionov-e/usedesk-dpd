@@ -31,6 +31,7 @@ const DATA_JSON = DATA_FOLDER_ROOT . DIRECTORY_SEPARATOR . 'bd.json';// Здес
 const TTN_JSON_KEY = 'ttn';                                         // Под таким ключом хранится в JSON созданное ТТН для Тикета
 const STATE_JSON_KEY = 'state';                                     // Под таким ключом хранится в JSON статус созданного ТТН для Тикета
 const INTERNAL_JSON_KEY = 'int';                                    // Под таким ключом хранится в JSON внутренний № заказа
+const DATE_JSON_KEY = 'date';                                       // Под таким ключом хранится в JSON дата обновления/создания в БД. Обновление происходит только в случае смены статуса
 const TICKET_ID_KEY_NAME = 'ticket_id';                             // Название параметра в Post-запросе от UseDesk
 const CITY_SEARCH_KEY_NAME = "city_search";                         // Название параметра в Get-запросе из формы при вводе в поле город
 

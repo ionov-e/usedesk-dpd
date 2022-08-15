@@ -11,8 +11,14 @@ class DB
     /**
      * Вносит запись в БД. Возвращает внесенные данные (без ticket ID)
      *
-     * Записи хранятся в JSON в таком виде: {$ticketId => { int => $int, state => $statusDPD, ttn => $ttn}, $ticketId2 => ... }
-     * $ticketId - ID Тикета из UseDesk, $int - внутренний №заказа, $statusDPD - полученный статус ТТН от DPD, $ttn - номер ТТН от DPD (если получили)
+     * Записи хранятся в JSON в таком виде:
+     * {$ticketId => { int => $int, state => $statusDPD, ttn => $ttn, date => 2022-08-15}, $ticketId2 => ... }
+     *
+     * $ticketId - ID Тикета из UseDesk,
+     * $int - внутренний №заказа,
+     * $statusDPD - полученный статус ТТН от DPD
+     * $ttn - номер ТТН от DPD (если получили)
+     * В 'date' записана дата записи (может быть повторная при перезаписи - случай смены статуса заказа)
      *
      * @param string $ticketId
      * @param string $internal
@@ -49,6 +55,7 @@ class DB
         $newArray = [];
         $newArray[INTERNAL_JSON_KEY] = $internal;
         $newArray[STATE_JSON_KEY] = $statusDPD;
+        $newArray[DATE_JSON_KEY] = date("Y-m-d");
         if (!is_null($ttn)) {   // Например, если Pending в статусе - не пришлют
             $newArray[TTN_JSON_KEY] = $ttn;
         }
