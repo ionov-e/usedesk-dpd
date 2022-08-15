@@ -23,7 +23,7 @@ define('LOG_MIN_LEVEL', $_ENV['LOG_MIN_LEVEL']);
 
 define('PROJECT_DIR', dirname(__DIR__, 1));              // Корневая папка
 
-const INDEX_FILE_USEDESK = 'usedesk-dpd.php';                       // Название файла куда будут приходить запросы от UseDesk
+const INDEX_FILE_USEDESK = 'usedesk-dpd.php';                       // Только название файла (без папки) куда будут приходить запросы от UseDesk
 const URL_SCRIPT_PHP = URL_SCRIPT_ROOT . DIRECTORY_SEPARATOR . INDEX_FILE_USEDESK; // URL путь к файлы выше
 const LOG_FOLDER_ROOT = PROJECT_DIR . DIRECTORY_SEPARATOR . 'log';  // Путь к папке для логов
 const DATA_FOLDER_ROOT = PROJECT_DIR . DIRECTORY_SEPARATOR . 'data';// Путь к папке для хранения данных
