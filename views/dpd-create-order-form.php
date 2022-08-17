@@ -60,18 +60,18 @@ $modifyDays = 1;
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoWeight"><strong>*</strong> Вес посылки (в кг)</label>
-                    <input name="cargoWeight" id="cargoWeight" placeholder="60" type="number" class="form-control"
+                    <input name="cargoWeight" id="cargoWeight" placeholder="60" type="number" step="0.01" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoVolume"><strong>*</strong> Объем посылки (в метрах
                         кубических)</label>
-                    <input name="cargoVolume" id="cargoVolume" placeholder="5" type="number" class="form-control"
+                    <input name="cargoVolume" id="cargoVolume" placeholder="5" type="number" step="0.01" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
-                    <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" class="form-control"
+                    <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" step="0.01" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
