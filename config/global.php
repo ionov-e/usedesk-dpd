@@ -20,6 +20,8 @@ define('FTP_USER', $_ENV['FTP_USER']);
 define('FTP_PASSWORD', $_ENV['FTP_PASSWORD']);
 define('CITY_LIST_SEARCH_MODE', $_ENV['CITY_LIST_SEARCH_MODE']);
 define('LOG_MIN_LEVEL', $_ENV['LOG_MIN_LEVEL']);
+define('DPD_ORDER_WEIGHT', $_ENV['DPD_ORDER_WEIGHT']);
+define('DPD_ORDER_VOLUME', $_ENV['DPD_ORDER_VOLUME']);
 
 define('PROJECT_DIR', dirname(__DIR__, 1));              // Корневая папка
 

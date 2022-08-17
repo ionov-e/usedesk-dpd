@@ -53,20 +53,20 @@ $modifyDays = 1;
                            maxlength="20" class="form-control" required>
                     <div class="invalid-feedback">Должно быть не больше 20 символов</div>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label class="form-label" for="cargoNumPack"><strong>*</strong> Количество посылок в
                         отправке</label>
                     <input name="cargoNumPack" id="cargoNumPack" value="1" type="number" min="1" class="form-control">
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label class="form-label" for="cargoWeight"><strong>*</strong> Вес посылки (в кг)</label>
-                    <input name="cargoWeight" id="cargoWeight" placeholder="60" type="number" step="0.01" class="form-control"
+                    <input name="cargoWeight" id="cargoWeight" value="<?= DPD_ORDER_WEIGHT ?>" type="number" step="0.001" class="form-control"
                            required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label class="form-label" for="cargoVolume"><strong>*</strong> Объем посылки (в метрах
                         кубических)</label>
-                    <input name="cargoVolume" id="cargoVolume" placeholder="5" type="number" step="0.01" class="form-control"
+                    <input name="cargoVolume" id="cargoVolume" value="<?= DPD_ORDER_VOLUME ?>" type="number" step="0.01" class="form-control"
                            required>
                 </div>
                 <div class="mb-3">
@@ -74,7 +74,7 @@ $modifyDays = 1;
                     <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" step="0.01" class="form-control"
                            required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3" hidden>
                     <label class="form-label" for="cargoCategory"><strong>*</strong> Категория содержимого</label>
                     <input name="cargoCategory" id="cargoCategory" value="Товары" type="text" class="form-control">
                 </div>
