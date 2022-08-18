@@ -36,6 +36,7 @@ const INTERNAL_JSON_KEY = 'int';                                    // Под т
 const DATE_JSON_KEY = 'date';                                       // Под таким ключом хранится в JSON дата обновления/создания в БД. Обновление происходит только в случае смены статуса
 const TICKET_ID_KEY_NAME = 'ticket_id';                             // Название параметра в Post-запросе от UseDesk
 const CITY_SEARCH_KEY_NAME = "city_search";                         // Название параметра в Get-запросе из формы при вводе в поле город
+const DELETE_TICKET_ID_KEY_NAME = 'delete_ticket_id';               // Название параметра в Get-запросе для удаления из БД тикета с ТТН
 
 
 // Установка часового пояса как в примере (где бы не выполнялся скрипт - одинаковое время)

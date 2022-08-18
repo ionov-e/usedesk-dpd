@@ -2,12 +2,16 @@
 
 namespace App\Handler;
 
+use App\DB;
 use App\Log;
 use App\Service\DpdOrder;
 use App\Service\UsedeskBlock;
 
 class UseDeskHandler
 {
+
+    const UD_DELETE_TTN_SUCCESS_PATH = PROJECT_DIR . '/views/ud-delete-ttn-success.php';
+    const UD_DELETE_TTN_ERROR_PATH = PROJECT_DIR . '/views/ud-delete-ttn-error.php';
 
     /**
      * Возвращает HTML содержимое для отображения в UseDesk-е на страницах тикета (при включенном блоке)
@@ -57,15 +61,44 @@ class UseDeskHandler
     {
         Log::info(Log::DPD_FORM, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
 
-        // Прекращаем выполнение, если айди тикета из адресной строки не найден
-        if (empty($ticketId = $_GET[TICKET_ID_KEY_NAME])) {
-            Log::warning(Log::DPD_FORM, "Не был прислан " . TICKET_ID_KEY_NAME);
-            echo "Не были переданы все обязательные параметры";
-            exit();
-        }
+        $ticketId = $_GET[TICKET_ID_KEY_NAME];
 
         Log::info(Log::DPD_FORM, "Прислан " . TICKET_ID_KEY_NAME . ": " . $ticketId);
 
         require PROJECT_DIR . "/views/dpd-create-order-form.php"; // Тут используется переменная $ticketId
+    }
+
+    /**
+     * Удаляет присланный тикет из БД
+     *
+     * @return void
+     */
+    public static function deleteFromDb(): void
+    {
+        Log::info(Log::UD_DEL_TTN, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        try {
+            $error = false;
+            $ticketId = $_GET[DELETE_TICKET_ID_KEY_NAME];
+            $dataArrays = DB::getDbAsArray(Log::UD_DEL_TTN);
+            if (!DB::removeTicketFromArray($dataArrays, $ticketId, Log::UD_DEL_TTN)) {
+                Log::warning(Log::UD_DEL_TTN, "Не был найден тикет: $ticketId");
+                $error = true;
+            }
+
+            if (!$error && DB::overwriteDb($dataArrays, Log::UD_DEL_TTN)) {
+                Log::info(Log::UD_DEL_TTN, "Успешно удален тикет: $ticketId");
+                include(self::UD_DELETE_TTN_SUCCESS_PATH);
+                return;
+            }
+        } catch (\Exception $e) {
+            $exceptionMsg = $e->getMessage();
+        }
+
+        $logMsg = "Не вышло удалить тикет: $ticketId";
+        if (!empty($exceptionMsg)){
+            $logMsg .= ". Словили Exception: " . $exceptionMsg;
+        }
+        Log::error(Log::UD_DEL_TTN, $logMsg);
+        include(self::UD_DELETE_TTN_ERROR_PATH);
     }
 }

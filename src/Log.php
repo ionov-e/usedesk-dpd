@@ -13,6 +13,7 @@ class Log
     const DPD_FORM = 'dpd_form';
     const DPD_ORDER = 'dpd_order';
     const UD_BLOCK = 'ud_block';
+    const UD_DEL_TTN = 'ud_del_ttn';
 
     protected static $instance = null;
 

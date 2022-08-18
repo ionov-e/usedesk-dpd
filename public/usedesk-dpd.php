@@ -14,8 +14,12 @@ require_once "../config/global.php";
 if ($_SERVER['REQUEST_METHOD'] === 'GET') { // Get-запросы
     if (!empty($_GET[CITY_SEARCH_KEY_NAME])) {
         DpdCityList::searchCitiesJson(); // Get-запрос: из формы при вводе в поле город
-    } else {
-        UseDeskHandler::generateFormForOrder(); // Get-запрос: Переход на форму из HTML-блока (в Get: ticketID)
+    } elseif (!empty($_GET[DELETE_TICKET_ID_KEY_NAME])) {
+        UseDeskHandler::deleteFromDb(); // Get-запрос: Переход на форму из HTML-блока (в Get: delete_ticket_id)
+    } elseif (!empty($_GET[TICKET_ID_KEY_NAME])) {
+        UseDeskHandler::generateFormForOrder(); // Get-запрос: Переход на форму из HTML-блока (в Get: ticket_id)
+    } else { #TODO возможность лога
+        echo "Не были переданы все обязательные параметры";
     }
 } elseif (!empty($_POST)) { // Post-запрос с содержанием формы
     UseDeskHandler::createDpdOrder();

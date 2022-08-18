@@ -46,11 +46,11 @@ class DpdOrder
 
         if ($return->status == 'OK') {
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
+            DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
             return "Успешно создано! Ваш ТТН: " . $return->orderNum;
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status);
+            DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status);
             return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
                 "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
         } else {
@@ -108,13 +108,17 @@ class DpdOrder
 
         if ($return->status == 'OK') {
             Log::info(Log::UD_BLOCK, $logMessage);
-            return DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, Log::UD_BLOCK);
+            return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, Log::UD_BLOCK);
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::UD_BLOCK, $logMessage);
-            return DB::saveToBD($ticketId, $return->orderNumberInternal, $return->status, Log::UD_BLOCK);
+            return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, Log::UD_BLOCK);
         } else { // Все остальные случаи - удаляем из БД
             Log::error(Log::UD_BLOCK, $logMessage);
-            DB::removeTicket($ticketId, Log::UD_BLOCK);
+            $dataArrays = DB::getDbAsArray(Log::UD_BLOCK);
+            DB::removeTicketFromArray($dataArrays, $ticketId, Log::UD_BLOCK);
+            if (DB::overwriteDb($dataArrays, Log::UD_BLOCK)) {
+                Log::info(Log::UD_BLOCK, "Успешно удалили: $ticketId");;
+            }
             return [];
         }
     }

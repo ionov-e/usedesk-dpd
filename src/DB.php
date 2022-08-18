@@ -30,7 +30,7 @@ class DB
      *
      * @throws \Exception
      */
-    public static function saveToBD(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $logCategory = Log::DPD_ORDER): array
+    public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $logCategory = Log::DPD_ORDER): array
     {
 
         if (!file_exists(DATA_JSON)) { // Если БД еще не существует
@@ -48,7 +48,8 @@ class DB
             $dataArrays = [];
 
         } else { // Если БД существует - попытаемся удалить тикет из нее, если существует
-            $dataArrays = self::removeTicket($ticketId, $logCategory);
+            $dataArrays = self::getDbAsArray($logCategory);
+            self::removeTicketFromArray($dataArrays, $ticketId, $logCategory);
         }
 
         // Добавляем вносимое значение
@@ -62,15 +63,29 @@ class DB
 
         $dataArrays[$ticketId] = $newArray;
 
-        // Перезаписываем нашу БД
-        if (!file_put_contents(DATA_JSON, json_encode($dataArrays, JSON_UNESCAPED_UNICODE))) {
-            Log::critical($logCategory, "Не получилось обновить БД");
-        } else {
+        if (self::overwriteDb($dataArrays, $logCategory)) { // Перезаписываем нашу БД
             Log::info($logCategory, "Добавили в БД запись (ID Тикета - $ticketId): " .
                 json_encode($dataArrays[$ticketId], JSON_UNESCAPED_UNICODE));
         }
 
         return $newArray;
+    }
+
+    /**
+     * Перезаписываем БД содержимым массива из параметра
+     *
+     * @param array $dataArrays
+     * @param string $logCategory
+     *
+     * @return bool
+     */
+    public static function overwriteDb(array $dataArrays, string $logCategory = Log::DPD_ORDER): bool
+    {
+        if (!file_put_contents(DATA_JSON, json_encode($dataArrays, JSON_UNESCAPED_UNICODE))) {
+            Log::critical($logCategory, "Не получилось обновить БД");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -115,16 +130,15 @@ class DB
     }
 
     /**
-     * Удаление тикета из БД. Возвращает БД в виде массивов
+     * Возвращает содержимое БД в виде массива
      *
-     * @param string $ticketId
      * @param string $logCategory
      *
      * @return array
      *
      * @throws \Exception
      */
-    public static function removeTicket(string $ticketId, string $logCategory = Log::DPD_ORDER): array
+    public static function getDbAsArray(string $logCategory = Log::DPD_ORDER): array
     {
         $dataArrays = json_decode(file_get_contents(DATA_JSON), true);
 
@@ -133,12 +147,26 @@ class DB
             throw new \Exception("Возникла ошибка");
         }
 
+        return $dataArrays;
+    }
+
+    /**
+     * Удаляет из массива с "БД" запись с тикетом и возвращает true, если тикет был найден внутри
+     *
+     * @param array $dataArrays
+     * @param string $ticketId
+     * @param string $logCategory
+     *
+     * @return bool
+     */
+    public static function removeTicketFromArray(array &$dataArrays, string $ticketId, string $logCategory = Log::DPD_ORDER): bool
+    {
         if (!empty($dataArrays[$ticketId])) {
             Log::info($logCategory, "Удаляем прошлый тикет $ticketId из БД с содержимым: " .
                 json_encode($dataArrays[$ticketId], JSON_UNESCAPED_UNICODE));
             unset($dataArrays[$ticketId]);
+            return true;
         }
-
-        return $dataArrays;
+        return false;
     }
 }
