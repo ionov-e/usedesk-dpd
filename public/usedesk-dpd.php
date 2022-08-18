@@ -1,7 +1,6 @@
 <?php
 /**
  * Эндпоинт и контроллер скрипта интеграции UseDesk - DPD
- * #TODO rename to index.php
  */
 
 use App\Handler\UseDeskHandler;
