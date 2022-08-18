@@ -94,10 +94,21 @@ class UseDeskHandler
         }
 
         $logMsg = "Не вышло удалить тикет: $ticketId";
-        if (!empty($exceptionMsg)){
+        if (!empty($exceptionMsg)) {
             $logMsg .= ". Словили Exception: " . $exceptionMsg;
         }
         Log::error(Log::UD_DEL_TTN, $logMsg);
         include(self::UD_DELETE_TTN_ERROR_PATH);
+    }
+
+    /**
+     * Выводит сообщение при запросе GET без необходимых параметров
+     *
+     * @return void
+     */
+    public static function generateNothing(): void
+    {
+        Log::info(Log::UNKNOWN, "Непредвиденный Get-запрос с IP: " . $_SERVER["REMOTE_ADDR"] . " С содержимым: " . json_encode($_GET, JSON_UNESCAPED_UNICODE));
+        echo "Не были переданы все обязательные параметры";
     }
 }

@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') { // Get-запросы
         UseDeskHandler::deleteFromDb(); // Get-запрос: Переход на форму из HTML-блока (в Get: delete_ticket_id)
     } elseif (!empty($_GET[TICKET_ID_KEY_NAME])) {
         UseDeskHandler::generateFormForOrder(); // Get-запрос: Переход на форму из HTML-блока (в Get: ticket_id)
-    } else { #TODO возможность лога
-        echo "Не были переданы все обязательные параметры";
+    } else {
+        UseDeskHandler::generateNothing(); // Get-запрос: непредвиденный запрос
     }
 } elseif (!empty($_POST)) { // Post-запрос с содержанием формы
     UseDeskHandler::createDpdOrder();
