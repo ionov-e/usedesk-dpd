@@ -1,5 +1,7 @@
 <?php
 /**
+ * Содержимое для HTML-блока UseDesk в случае, если ТТН для тикета в "БД" найден со статусом "ОК"
+ *
  * @var $args array Аргументы извне
  * */ ?>
 <div class="alert alert-success" role="alert">
