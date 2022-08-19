@@ -5,4 +5,5 @@
 /data/dpd-cities/
 /data/bd.json
 /log/
+/public/index.php
 /vendor/
