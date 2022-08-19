@@ -124,45 +124,49 @@ $modifyDays = 1;
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
                     </div>
                     <div class="col-4">
-                        <label class="form-label" for="senderAddress[house]"><strong>*</strong> Номер дома</label>
-                        <input name="senderAddress[house]" id="senderAddress[house]" placeholder="1" type="text"
+                        <label class="form-label" for="senderHouse"><strong>*</strong> Номер дома</label>
+                        <input name="senderAddress[house]" id="senderHouse" placeholder="1" type="text"
                                class="form-control" required>
                     </div>
                 </div>
                 <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
                 <input hidden name="senderAddress[region]" id="senderRegion" type="text" class="form-control">
+
+                <?php if(CITY_LIST_SEARCH_MODE) : ?>
+                    <div class="row">
+                        <div class="col">
+                            <label class="form-label" for="senderStreet"><strong>*</strong> Наименование
+                                улицы</label>
+                            <input id="senderStreet" name="senderAddress[street]" placeholder="Авиаторов"
+                                   type="text" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="senderStreetAbbr"><strong>*</strong> Аббревиатура улицы</label>
+                            <input name="senderAddress[streetAbbr]" id="senderStreetAbbr" placeholder="ул"
+                                   type="text" class="form-control" required>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <div class="row">
                     <div class="col">
-                        <label class="form-label" for="senderAddress[street]"><strong>*</strong> Наименование
-                            улицы</label>
-                        <input id="senderAddress[street]" name="senderAddress[street]" placeholder="Авиаторов"
-                               type="text" class="form-control" required>
-                    </div>
-                    <div class="col">
-                        <label class="form-label" for="senderAddress[streetAbbr]"><strong>*</strong> Аббревиатура улицы</label>
-                        <input name="senderAddress[streetAbbr]" id="senderAddress[streetAbbr]" placeholder="ул"
-                               type="text" class="form-control" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="form-label" for="senderAddress[houseKorpus]">Корпус</label>
-                        <input name="senderAddress[houseKorpus]" id="senderAddress[houseKorpus]" placeholder=""
+                        <label class="form-label" for="senderKorpus">Корпус</label>
+                        <input name="senderAddress[houseKorpus]" id="senderKorpus" placeholder=""
                                type="text" class="form-control">
                     </div>
                     <div class="col">
-                        <label class="form-label" for="senderAddress[str]">Строение</label>
-                        <input name="senderAddress[str]" id="senderAddress[str]" placeholder="" type="text"
+                        <label class="form-label" for="senderStoenie">Строение</label>
+                        <input name="senderAddress[str]" id="senderStoenie" placeholder="" type="text"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label class="form-label" for="senderAddress[office]">Офис </label>
-                        <input name="senderAddress[office]" id="senderAddress[office]" placeholder="" type="text"
+                        <label class="form-label" for="senderOffice">Офис </label>
+                        <input name="senderAddress[office]" id="senderOffice" placeholder="" type="text"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label class="form-label" for="senderAddress[flat]">Квартира</label>
-                        <input name="senderAddress[flat]" id="senderAddress[flat]" placeholder="" type="text"
+                        <label class="form-label" for="senderFlat">Квартира</label>
+                        <input name="senderAddress[flat]" id="senderFlat" placeholder="" type="text"
                                class="form-control">
                     </div>
                 </div>
@@ -264,7 +268,14 @@ $modifyDays = 1;
                         'CityFront': 'senderCityFront',
                         'CityList': 'senderCityList',
                         'CityListParent': 'senderCityListParent',
-                        'Region': 'senderRegion'
+                        'Region': 'senderRegion',
+                        'Street': 'senderStreet',
+                        'StreetAbbr': 'senderStreetAbbr',
+                        'House': 'senderHouse',
+                        'Korpus': 'senderKorpus',
+                        'Stoenie': 'senderStoenie',
+                        'Office': 'senderOffice',
+                        'Flat': 'senderFlat'
                     };
                 }
                 if (e.target.id === 'receiverCityFront') {
@@ -313,15 +324,44 @@ $modifyDays = 1;
                                 newA.dataset.abrv = cityArray[0];
                                 newA.dataset.city = cityArray[1];
                                 newA.dataset.region = cityArray[2];
-                                newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
+
+                                <?php if(CITY_LIST_SEARCH_MODE) : // Это для всех режимов поиска кроме 0?>
+                                    newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
+                                    document.querySelector(`#${ids.CityList}`).appendChild(newA);
+                                    newA.addEventListener('click', function () {
+                                        document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
+                                        document.querySelector(`#${ids.City}`).value = this.dataset.city;
+                                        document.querySelector(`#${ids.Region}`).value = this.dataset.region;
+                                        document.querySelector(`#${ids.CityFront}`).setCustomValidity("");
+                                        document.querySelector(`#${ids.CityList}`).remove();
+                                    });
+
+                                <?php else : // Это для расширенного режима поиска (включая улицу, дом, квартиру) ?>
+                                newA.dataset.street = cityArray[4];
+                                newA.dataset.streetAbbr = cityArray[5];
+                                newA.dataset.house = cityArray[6];
+                                newA.dataset.postalCode = cityArray[7];
+                                newA.dataset.korpus = cityArray[8];
+                                newA.dataset.stroenie = cityArray[9];
+                                newA.dataset.office = cityArray[10];
+                                newA.dataset.appartment = cityArray[11];
+                                newA.append(`${cityArray[3]}`);
                                 document.querySelector(`#${ids.CityList}`).appendChild(newA);
                                 newA.addEventListener('click', function () {
                                     document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
                                     document.querySelector(`#${ids.City}`).value = this.dataset.city;
                                     document.querySelector(`#${ids.Region}`).value = this.dataset.region;
+                                    document.querySelector(`#${ids.Street}`).value = this.dataset.street;  // #TODO Error: Cannot set properties of null (setting 'value')
+                                    document.querySelector(`#${ids.StreetAbbr}`).value = this.dataset.streetAbbr;
+                                    document.querySelector(`#${ids.House}`).value = this.dataset.house;
+                                    document.querySelector(`#${ids.Korpus}`).value = this.dataset.korpus;
+                                    document.querySelector(`#${ids.Stoenie}`).value = this.dataset.stroenie;
+                                    document.querySelector(`#${ids.Office}`).value = this.dataset.office;
+                                    document.querySelector(`#${ids.Flat}`).value = this.dataset.appartment;
                                     document.querySelector(`#${ids.CityFront}`).setCustomValidity("");
                                     document.querySelector(`#${ids.CityList}`).remove();
                                 });
+                                <?php endif; ?>
                             }
                         );
                     });
