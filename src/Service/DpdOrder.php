@@ -134,6 +134,10 @@ class DpdOrder
 
         $form = $_POST;
 
+        if (empty($form['senderAddress']['contactFio'])) { // Если пусто значение - берем из "Названия компании"
+            $form['senderAddress']['contactFio'] = $form['senderAddress']['name'];
+        }
+
         // Незаполненные необязательные поля будут содержать null. Избавимся от них
         foreach ($form as $element) {
             if (empty($element)) {

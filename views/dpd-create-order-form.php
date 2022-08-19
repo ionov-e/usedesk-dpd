@@ -90,14 +90,14 @@ $modifyDays = 1;
                 </div>
                 <div class="row">
                     <div class="col">
-                        <label class="form-label" for="senderAddress[name]"><strong>*</strong> Имя/Название организации</label>
+                        <label class="form-label" for="senderAddress[name]"><strong>*</strong> Контактное лицо</label>
                         <input name="senderAddress[name]" id="senderAddress[name]" placeholder="Илья Отправитель"
                                type="text" class="form-control" required>
                     </div>
-                    <div class="col">
+                    <div class="col" hidden>
                         <label class="form-label" for="senderAddress[contactFio]"><strong>*</strong> ФИО</label>
                         <input name="senderAddress[contactFio]" id="senderAddress[contactFio]"
-                               placeholder="Смирнов Игорь Николаевич" type="text" class="form-control" required>
+                               placeholder="Смирнов Игорь Николаевич" type="text" class="form-control">
                     </div>
                     <div class="col">
                         <label class="form-label" for="senderAddress[contactPhone]"><strong>*</strong> Контактный
