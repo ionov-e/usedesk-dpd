@@ -132,21 +132,20 @@ $modifyDays = 1;
                 <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
                 <input hidden name="senderAddress[region]" id="senderRegion" type="text" class="form-control">
 
-                <?php if(CITY_LIST_SEARCH_MODE) : ?>
-                    <div class="row">
-                        <div class="col">
-                            <label class="form-label" for="senderStreet"><strong>*</strong> Наименование
-                                улицы</label>
-                            <input id="senderStreet" name="senderAddress[street]" placeholder="Авиаторов"
-                                   type="text" class="form-control" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="senderStreetAbbr"><strong>*</strong> Аббревиатура улицы</label>
-                            <input name="senderAddress[streetAbbr]" id="senderStreetAbbr" placeholder="ул"
-                                   type="text" class="form-control" required>
-                        </div>
+
+                <div class="row" <?php if(!CITY_LIST_SEARCH_MODE) {echo 'hidden';} ?> >
+                    <div class="col">
+                        <label class="form-label" for="senderStreet"><strong>*</strong> Наименование
+                            улицы</label>
+                        <input id="senderStreet" name="senderAddress[street]" placeholder="Авиаторов"
+                               type="text" class="form-control" required>
                     </div>
-                <?php endif; ?>
+                    <div class="col">
+                        <label class="form-label" for="senderStreetAbbr"><strong>*</strong> Аббревиатура улицы</label>
+                        <input name="senderAddress[streetAbbr]" id="senderStreetAbbr" placeholder="ул"
+                               type="text" class="form-control" required>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="col">
@@ -255,7 +254,6 @@ $modifyDays = 1;
 
         <script>
             document.querySelector('#senderCityFront').addEventListener('keyup', searching);
-            // document.querySelector('#receiverCityFront').addEventListener('keyup', searching);
 
             function searching(e) {
                 let keywordsStr = e.target.value;
@@ -321,7 +319,7 @@ $modifyDays = 1;
                         data.forEach((cityArray) => {
                                 let newA = document.createElement('a');
                                 newA.setAttribute('class', 'list-group-item list-group-item-action cursor-pointer');
-                                newA.dataset.abrv = cityArray[0];
+                                newA.dataset.cityAbbr = cityArray[0];
                                 newA.dataset.city = cityArray[1];
                                 newA.dataset.region = cityArray[2];
 
@@ -329,7 +327,7 @@ $modifyDays = 1;
                                     newA.append(`${cityArray[0]}. ${cityArray[1]} (${cityArray[2]})`);
                                     document.querySelector(`#${ids.CityList}`).appendChild(newA);
                                     newA.addEventListener('click', function () {
-                                        document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
+                                        document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.cityAbbr}. ${this.dataset.city} (${this.dataset.region})`;
                                         document.querySelector(`#${ids.City}`).value = this.dataset.city;
                                         document.querySelector(`#${ids.Region}`).value = this.dataset.region;
                                         document.querySelector(`#${ids.CityFront}`).setCustomValidity("");
@@ -348,7 +346,7 @@ $modifyDays = 1;
                                 newA.append(`${cityArray[3]}`);
                                 document.querySelector(`#${ids.CityList}`).appendChild(newA);
                                 newA.addEventListener('click', function () {
-                                    document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.abrv}. ${this.dataset.city} (${this.dataset.region})`;
+                                    document.querySelector(`#${ids.CityFront}`).value = `${this.dataset.region}, ${this.dataset.cityAbbr}. ${this.dataset.city}, ${this.dataset.streetAbbr}. ${this.dataset.street} `;
                                     document.querySelector(`#${ids.City}`).value = this.dataset.city;
                                     document.querySelector(`#${ids.Region}`).value = this.dataset.region;
                                     document.querySelector(`#${ids.Street}`).value = this.dataset.street;  // #TODO Error: Cannot set properties of null (setting 'value')

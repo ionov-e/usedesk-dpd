@@ -383,17 +383,17 @@ class DpdCityList
             $korpus = '';
             $stroenie = '';
             if ('стр' == $cityArray['data']['block_type']) { // Два значения видел "стр" и "к". Первое - строение, второе - корпус
-                $stroenie = $cityArray['data']['block_type'];
+                $stroenie = $cityArray['data']['block'];
             } elseif ('к' == $cityArray['data']['block_type']) {
-                $korpus = $cityArray['data']['block_type'];
+                $korpus = $cityArray['data']['block'];
             }
 
             $office = '';
             $apt = '';
             if ('офис' == $cityArray['data']['flat_type']) { // Два значения видел "кв" и "офис"
-                $office = $cityArray['data']['flat_type'];
+                $office = $cityArray['data']['flat'];
             } elseif ('кв' == $cityArray['data']['flat_type']) {
-                $apt = $cityArray['data']['flat_type'];
+                $apt = $cityArray['data']['flat'];
             }
 
             $returnArray[] = [$abbreviation, $city, $region, $fullAddress, $street, $streetAbbr, $house, $postalCode, $korpus, $stroenie, $office, $apt];
