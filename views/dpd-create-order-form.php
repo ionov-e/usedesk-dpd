@@ -120,7 +120,7 @@ $modifyDays = 1;
                 </div>
                 <div class="row">
                     <div class="col-8" id="senderCityListParent">
-                        <label class="form-label" for="senderCityFront"><strong>*</strong> Населенный пункт</label>
+                        <label class="form-label" for="senderCityFront"><strong>*</strong> <?php echo (CITY_LIST_SEARCH_MODE ? 'Населенный пункт' : 'Адрес'); ?></label>
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
                     </div>
                     <div class="col-4">
