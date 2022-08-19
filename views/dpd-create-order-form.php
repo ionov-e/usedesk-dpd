@@ -28,31 +28,42 @@ $modifyDays = 1;
             <h4>Отправка произведется по тарифу DPD OPTIMUM. Вид доставки Двери-Двери</h4>
             <form action="" method="post" class="was-validated custom-form">
                 <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $ticketId ?>">
-                <div class="mb-3">
-                    <label class="form-label" for="senderAddress[datePickup]"><strong>*</strong> Дата планируемой
-                        отгрузки:</label>
-                    <input type="date"
-                           min="<?= $minDate = (new DateTime())->modify("+ {$modifyDays} days")->format("Y-m-d") ?>"
-                           class="form-control" placeholder="Выберите дату отгрузки" name="senderAddress[datePickup]"
-                           id="senderAddress[datePickup]" value="<?= $minDate ?>" required>
-                    <div id="my-listen-invalid" class="invalid-feedback">Обязательно для заполнения.</div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[datePickup]"><strong>*</strong> Дата планируемой
+                            отгрузки:</label>
+                        <input type="date"
+                               min="<?= $minDate = (new DateTime())->modify("+ {$modifyDays} days")->format("Y-m-d") ?>"
+                               class="form-control" placeholder="Выберите дату отгрузки" name="senderAddress[datePickup]"
+                               id="senderAddress[datePickup]" value="<?= $minDate ?>" required>
+                        <div id="my-listen-invalid" class="invalid-feedback">Обязательно для заполнения.</div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[pickupTimePeriod]"><strong>*</strong> Интервалы времени
+                            приёма</label>
+                        <select class="form-select" name="senderAddress[pickupTimePeriod]"
+                                id="senderAddress[pickupTimePeriod]">
+                            <option>9-18</option>
+                            <option>9-13</option>
+                            <option>13-18</option>
+                        </select>
+                    </div>
+
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="senderAddress[pickupTimePeriod]"><strong>*</strong> Интервалы времени
-                        приёма</label>
-                    <select class="form-select" name="senderAddress[pickupTimePeriod]"
-                            id="senderAddress[pickupTimePeriod]">
-                        <option>9-18</option>
-                        <option>9-13</option>
-                        <option>13-18</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (не
-                        больше 20 символов)</label>
-                    <input name="orderNumberInternal" id="orderNumberInternal" placeholder="220620-12312" type="text"
-                           maxlength="20" class="form-control" required>
-                    <div class="invalid-feedback">Должно быть не больше 20 символов</div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки (не
+                            больше 20 символов)</label>
+                        <input name="orderNumberInternal" id="orderNumberInternal" placeholder="220620-12312" type="text"
+                               maxlength="20" class="form-control" required>
+                        <div class="invalid-feedback">Должно быть не больше 20 символов</div>
+                    </div>
+
+                    <div class="col">
+                        <label class="form-label" for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
+                        <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" step="0.01" class="form-control"
+                               required>
+                    </div>
                 </div>
                 <div class="mb-3" hidden>
                     <label class="form-label" for="cargoNumPack"><strong>*</strong> Количество посылок в
@@ -74,10 +85,8 @@ $modifyDays = 1;
                     <label class="form-label" for="cargoCategory"><strong>*</strong> Категория содержимого</label>
                     <input name="cargoCategory" id="cargoCategory" value="Товары" type="text" class="form-control">
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Отправитель</h5>
-                    </div>
+                <div>
+                    <h4 class="text-center">Отправитель</h4>
                 </div>
                 <div class="row">
                     <div class="col">
@@ -85,15 +94,11 @@ $modifyDays = 1;
                         <input name="senderAddress[name]" id="senderAddress[name]" placeholder="Илья Отправитель"
                                type="text" class="form-control" required>
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[contactFio]"><strong>*</strong> ФИО</label>
                         <input name="senderAddress[contactFio]" id="senderAddress[contactFio]"
                                placeholder="Смирнов Игорь Николаевич" type="text" class="form-control" required>
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[contactPhone]"><strong>*</strong> Контактный
                             телефон</label>
@@ -101,7 +106,7 @@ $modifyDays = 1;
                                placeholder="89165555555" type="tel" class="form-control" required>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" hidden>
                     <div class="col">
                         <label class="form-label" for="senderAddress[index]">Почтовый индекс</label>
                         <input name="senderAddress[index]" id="senderAddress[index]" placeholder="103426" type="number"
@@ -109,9 +114,14 @@ $modifyDays = 1;
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col" id="senderCityListParent">
+                    <div class="col-8" id="senderCityListParent">
                         <label class="form-label" for="senderCityFront"><strong>*</strong> Населенный пункт</label>
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" for="senderAddress[house]"><strong>*</strong> Номер дома</label>
+                        <input name="senderAddress[house]" id="senderAddress[house]" placeholder="1" type="text"
+                               class="form-control" required>
                     </div>
                 </div>
                 <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
@@ -123,8 +133,6 @@ $modifyDays = 1;
                         <input id="senderAddress[street]" name="senderAddress[street]" placeholder="Авиаторов"
                                type="text" class="form-control" required>
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[streetAbbr]"><strong>*</strong> Аббревиатура улицы</label>
                         <input name="senderAddress[streetAbbr]" id="senderAddress[streetAbbr]" placeholder="ул"
@@ -133,33 +141,20 @@ $modifyDays = 1;
                 </div>
                 <div class="row">
                     <div class="col">
-                        <label class="form-label" for="senderAddress[house]"><strong>*</strong> Номер дома</label>
-                        <input name="senderAddress[house]" id="senderAddress[house]" placeholder="1" type="text"
-                               class="form-control" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
                         <label class="form-label" for="senderAddress[houseKorpus]">Корпус</label>
                         <input name="senderAddress[houseKorpus]" id="senderAddress[houseKorpus]" placeholder=""
                                type="text" class="form-control">
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[str]">Строение</label>
                         <input name="senderAddress[str]" id="senderAddress[str]" placeholder="" type="text"
                                class="form-control">
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[office]">Офис </label>
                         <input name="senderAddress[office]" id="senderAddress[office]" placeholder="" type="text"
                                class="form-control">
                     </div>
-                </div>
-                <div class="row">
                     <div class="col">
                         <label class="form-label" for="senderAddress[flat]">Квартира</label>
                         <input name="senderAddress[flat]" id="senderAddress[flat]" placeholder="" type="text"
