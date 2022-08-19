@@ -42,10 +42,10 @@ class DpdCityList
         $query = rtrim(ltrim($_GET[CITY_SEARCH_KEY_NAME])); // Обрезаем с обеих сторон запроса пробелы
         Log::debug(Log::DPD_CITY_FIND, "Режим поиска: " . CITY_LIST_SEARCH_MODE . ". От пользователя: $query");
         try {
-            if (!CITY_LIST_SEARCH_MODE) { // Если режим не 0 - мы ищем не Dadata
+            if (CITY_LIST_SEARCH_MODE === 0 || CITY_LIST_SEARCH_MODE === 1) { // Если режим 0 или 1 - мы ищем в Dadata
                 $dadataResponse = self::searchInDadata($query);
                 echo json_encode($dadataResponse, JSON_UNESCAPED_UNICODE);
-            } else {  // Если режим > 0 - ищем в списке городов от DPD
+            } else {  // Если режим 2 или 3 - ищем в списке городов от DPD
                 $cityIds = self::searchCitiesIdsInDpdList($query);
                 $returnArray = self::searchCitiesArrayInDpdList($cityIds);
                 echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
@@ -251,7 +251,7 @@ class DpdCityList
     private static function searchCitiesIdsInDpdList(string $query): array
     {
 
-        if (CITY_LIST_SEARCH_MODE === 1) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
+        if (CITY_LIST_SEARCH_MODE === 2) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
             $file = self::CITY_LIST_CITIES_PATH_SAFE;
         } else { // Использовать свежие сгенерированные данные из DPD
             $file = self::CITY_LIST_CITIES_PATH_NEW;
@@ -299,7 +299,7 @@ class DpdCityList
      */
     private static function searchCitiesArrayInDpdList(array $cityIds): array
     {
-        if (CITY_LIST_SEARCH_MODE === 1) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
+        if (CITY_LIST_SEARCH_MODE === 2) { // Использовать уже проверенные распарсенные данные из DPD со списком городов
             $file = file_get_contents(self::CITY_LIST_IDS_PATH_SAFE);
         } else {
             $file = file_get_contents(self::CITY_LIST_IDS_PATH_NEW);
@@ -319,7 +319,7 @@ class DpdCityList
         $cityType = array_column($returnArray, 0);
         array_multisort($returnArray, SORT_ASC, $cityType);
 
-        Log::debug(Log::DPD_CITY_FIND, "Вернули массив с " . count($returnArray));
+        Log::debug(Log::DPD_CITY_FIND, "Вернули массив с количеством: " . count($returnArray));
         return $returnArray;
     }
 
@@ -336,12 +336,21 @@ class DpdCityList
 
         $dadataObject = new \Dadata\DadataClient(DADATA_API_KEY, null);
 
-        $fields = array(
-            "locations" => [["country" => "Россия"]],   // Ищем только в РФ
-            "from_bound" => ["value" => "city"],        // Эти 2 строки
-            "to_bound" => ["value" => "settlement"],
-            "restrict_value" => true
-        );
+        if (CITY_LIST_SEARCH_MODE === 0) { // Поиск вплоть до дома/квартиры
+            $fields = array(
+                "locations" => [["country" => "Россия"]],
+                "from_bound" => ["value" => "street"],
+                "to_bound" => ["value" => "flat"],
+                "restrict_value" => true
+            );
+        } else {  // Поиск вплоть лишь до города/поселка
+            $fields = array(
+                "locations" => [["country" => "Россия"]],
+                "from_bound" => ["value" => "city"],
+                "to_bound" => ["value" => "settlement"],
+                "restrict_value" => true
+            );
+        }
 
         $dadataResponse = $dadataObject->suggest("address", $query, self::MAX_CITY_COUNT_TO_RETURN, $fields);
 
@@ -359,14 +368,40 @@ class DpdCityList
             $city = $cityArray['data']['settlement'] ?? $cityArray['data']['city_district'] ?? $cityArray['data']['city'];
             $region = $cityArray['data']['region_with_type'];
 
-            $newArray = [$abbreviation, $city, $region];
+            if (CITY_LIST_SEARCH_MODE === 1) { // Если поиск заканчивается лишь на городе/поселке - кроме 3 значений ничего не забираем
+                $returnArray[] = [$abbreviation, $city, $region];
+                continue;
+            }
 
-            $returnArray[] = $newArray;
+            $fullAddress = $cityArray['value'];
+            $street = $cityArray['data']['street'];
+            $streetAbbr = $cityArray['data']['street_type'];
+            $house = $cityArray['data']['house'] ?? '';
+            $postalCode = $cityArray['data']['postal_code'];
+
+
+            $korpus = '';
+            $stroenie = '';
+            if ('стр' == $cityArray['data']['block_type']) { // Два значения видел "стр" и "к". Первое - строение, второе - корпус
+                $stroenie = $cityArray['data']['block_type'];
+            } elseif ('к' == $cityArray['data']['block_type']) {
+                $korpus = $cityArray['data']['block_type'];
+            }
+
+            $office = '';
+            $apt = '';
+            if ('офис' == $cityArray['data']['flat_type']) { // Два значения видел "кв" и "офис"
+                $office = $cityArray['data']['flat_type'];
+            } elseif ('кв' == $cityArray['data']['flat_type']) {
+                $apt = $cityArray['data']['flat_type'];
+            }
+
+            $returnArray[] = [$abbreviation, $city, $region, $fullAddress, $street, $streetAbbr, $house, $postalCode, $korpus, $stroenie, $office, $apt];
         }
 
         Log::debug(Log::DPD_CITY_FIND, "Вернули массив: " . json_encode($returnArray, JSON_UNESCAPED_UNICODE));
 
-        Log::info(Log::DPD_CITY_FIND, "Вернули массив с кол-во городов: " . count($returnArray));
+        Log::info(Log::DPD_CITY_FIND, "Вернули массив с кол-вом городов: " . count($returnArray));
         return $returnArray;
     }
 }

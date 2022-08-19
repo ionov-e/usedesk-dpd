@@ -251,7 +251,7 @@ $modifyDays = 1;
 
         <script>
             document.querySelector('#senderCityFront').addEventListener('keyup', searching);
-            document.querySelector('#receiverCityFront').addEventListener('keyup', searching);
+            // document.querySelector('#receiverCityFront').addEventListener('keyup', searching);
 
             function searching(e) {
                 let keywordsStr = e.target.value;
