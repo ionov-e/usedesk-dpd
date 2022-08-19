@@ -70,11 +70,6 @@ $modifyDays = 1;
                     <input name="cargoVolume" id="cargoVolume" value="<?= DPD_ORDER_VOLUME ?>" type="number" step="0.01" class="form-control"
                            required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="cargoValue"><strong>*</strong> Оценочная стоимость посылки</label>
-                    <input name="cargoValue" id="cargoValue" placeholder="60000" type="number" step="0.01" class="form-control"
-                           required>
-                </div>
                 <div class="mb-3" hidden>
                     <label class="form-label" for="cargoCategory"><strong>*</strong> Категория содержимого</label>
                     <input name="cargoCategory" id="cargoCategory" value="Товары" type="text" class="form-control">
@@ -96,7 +91,7 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="receiverAddress[name]"><strong>*</strong> Имя/Название
                             организации </label>
-                        <input name="receiverAddress[name]" id="receiverAddress[name]" value="ООО 'ФИРМЕННЫЕ РЕШЕНИЯ'"
+                        <input name="receiverAddress[name]" id="receiverAddress[name]" value="<?= DPD_ORDER_RECEIVER_COMPANY ?>'"
                                type="text" class="form-control">
                     </div>
                 </div>
@@ -109,7 +104,7 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="receiverAddress[contactFio]"><strong>*</strong> ФИО</label>
                         <input name="receiverAddress[contactFio]" id="receiverAddress[contactFio]"
-                               value="Сотрудник склада" type="text" class="form-control">
+                               value="<?= DPD_ORDER_RECEIVER_CONTACT_NAME ?>" type="text" class="form-control">
                     </div>
                 </div>
                 <div class="row">
@@ -122,7 +117,7 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="receiverAddress[contactPhone]"><strong>*</strong> Контактный
                             телефон</label>
-                        <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]" value="244 68 04"
+                        <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]" value="<?= DPD_ORDER_RECEIVER_PHONE ?>"
                                type="tel" class="form-control">
                     </div>
                 </div>
@@ -144,15 +139,15 @@ $modifyDays = 1;
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
                     </div>
                     <div class="col" id="receiverCityListParent">
-                        <label class="form-label" for="receiverCityFront"><strong>*</strong> Город</label>
-                        <input id="receiverCityFront" value="Петро-Славянка" type="text" class="form-control">
+                        <label class="form-label" for="receiverCityFront"><strong>*</strong> Населенный пункт</label>
+                        <input id="receiverCityFront" value="<?= DPD_ORDER_RECEIVER_CITY ?>" type="text" class="form-control">
                     </div>
                 </div>
                 <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
                 <input hidden name="senderAddress[region]" id="senderRegion" type="text" class="form-control">
-                <input hidden name="receiverAddress[city]" id="receiverCity" value="Петро-Славянка" type="text"
+                <input hidden name="receiverAddress[city]" id="receiverCity" value="<?= DPD_ORDER_RECEIVER_CITY ?>" type="text"
                        class="form-control">
-                <input hidden name="receiverAddress[region]" id="receiverRegion" value="г Санкт-Петербург" type="text"
+                <input hidden name="receiverAddress[region]" id="receiverRegion" value="<?= DPD_ORDER_RECEIVER_REGION ?>" type="text"
                        class="form-control">
                 <div class="row">
                     <div class="col">
@@ -164,7 +159,7 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="receiverAddress[street]"><strong>*</strong> Наименование
                             улицы</label>
-                        <input name="receiverAddress[street]" id="receiverAddress[street]" value="Софийская" type="text"
+                        <input name="receiverAddress[street]" id="receiverAddress[street]" value="<?= DPD_ORDER_RECEIVER_STREET ?>" type="text"
                                class="form-control">
                     </div>
                 </div>
@@ -177,7 +172,7 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="receiverAddress[streetAbbr]"><strong>*</strong> Аббревиатура
                             улицы</label>
-                        <input name="receiverAddress[streetAbbr]" id="receiverAddress[streetAbbr]" value="ул"
+                        <input name="receiverAddress[streetAbbr]" id="receiverAddress[streetAbbr]" value="<?= DPD_ORDER_RECEIVER_STREET_ABBR ?>"
                                type="text" class="form-control">
                     </div>
                 </div>
@@ -189,7 +184,7 @@ $modifyDays = 1;
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[house]"><strong>*</strong> Номер дома</label>
-                        <input name="receiverAddress[house]" id="receiverAddress[house]" value="118" type="text"
+                        <input name="receiverAddress[house]" id="receiverAddress[house]" value="<?= DPD_ORDER_RECEIVER_HOUSE ?>" type="text"
                                class="form-control">
                     </div>
                 </div>
@@ -201,7 +196,7 @@ $modifyDays = 1;
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[houseKorpus]">Корпус</label>
-                        <input name="receiverAddress[houseKorpus]" id="receiverAddress[houseKorpus]" value="5"
+                        <input name="receiverAddress[houseKorpus]" id="receiverAddress[houseKorpus]" value="<?= DPD_ORDER_RECEIVER_HOUSE_KORPUS ?>"
                                type="text" class="form-control">
                     </div>
                 </div>
@@ -213,7 +208,7 @@ $modifyDays = 1;
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[str]">Строение</label>
-                        <input name="receiverAddress[str]" id="receiverAddress[str]" placeholder="" type="text"
+                        <input name="receiverAddress[str]" id="receiverAddress[str]" value="<?= DPD_ORDER_RECEIVER_HOUSE_STROENIE ?>" type="text"
                                class="form-control">
                     </div>
                 </div>
@@ -225,7 +220,7 @@ $modifyDays = 1;
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[office]">Офис </label>
-                        <input name="receiverAddress[office]" id="receiverAddress[office]" placeholder="" type="text"
+                        <input name="receiverAddress[office]" id="receiverAddress[office]" value="<?= DPD_ORDER_RECEIVER_OFFICE ?>" type="text"
                                class="form-control">
                     </div>
                 </div>
@@ -237,7 +232,7 @@ $modifyDays = 1;
                     </div>
                     <div class="col">
                         <label class="form-label" for="receiverAddress[flat]">Квартира</label>
-                        <input name="receiverAddress[flat]" id="receiverAddress[flat]" placeholder="" type="text"
+                        <input name="receiverAddress[flat]" id="receiverAddress[flat]" value="<?= DPD_ORDER_RECEIVER_KVARTIRA ?>" type="text"
                                class="form-control">
                     </div>
                 </div>
