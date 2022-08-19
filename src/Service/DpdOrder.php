@@ -173,7 +173,8 @@ class DpdOrder
                 'street' => $form['senderAddress']['street'],
                 'house' => $form['senderAddress']['house'],
                 'contactFio' => $form['senderAddress']['contactFio'],
-                'contactPhone' => $form['senderAddress']['contactPhone']
+                'contactPhone' => $form['senderAddress']['contactPhone'],
+                'contactEmail' => $form['senderAddress']['contactEmail']
             )
         );
 
@@ -219,7 +220,8 @@ class DpdOrder
                 'street' => $form['receiverAddress']['street'],
                 'house' => $form['receiverAddress']['house'],
                 'contactFio' => $form['receiverAddress']['contactFio'],
-                'contactPhone' => $form['receiverAddress']['contactPhone']
+                'contactPhone' => $form['receiverAddress']['contactPhone'],
+                'contactEmail' => $form['receiverAddress']['contactEmail']
             ),
             'cargoRegistered' => false
         );

@@ -105,6 +105,11 @@ $modifyDays = 1;
                         <input name="senderAddress[contactPhone]" id="senderAddress[contactPhone]"
                                placeholder="89165555555" type="tel" class="form-control" required>
                     </div>
+                    <div class="col">
+                        <label class="form-label" for="senderAddress[contactEmail]"> Email</label>
+                        <input name="senderAddress[contactEmail]" id="senderAddress[contactEmail]" placeholder="sender@mail.ru"
+                               type="email" class="form-control">
+                    </div>
                 </div>
                 <div class="row" hidden>
                     <div class="col">
@@ -181,6 +186,11 @@ $modifyDays = 1;
                             телефон</label>
                         <input name="receiverAddress[contactPhone]" id="receiverAddress[contactPhone]" value="<?= DPD_ORDER_RECEIVER_PHONE ?>"
                                type="tel" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label" for="receiverAddress[contactEmail]"> Email</label>
+                        <input name="receiverAddress[contactEmail]" id="receiverAddress[contactEmail]" value="<?= DPD_ORDER_RECEIVER_EMAIL ?>"
+                               type="email" class="form-control">
                     </div>
                     <div>
                         <label class="form-label" for="receiverAddress[index]">Почтовый индекс</label>
