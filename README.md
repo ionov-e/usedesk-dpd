@@ -21,7 +21,7 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
-<img src="http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-block-0.png" width="200">
+![block0](http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-block-0.png)
 
 - **Если уже создана ТТН, осуществив оформление в предыдущем пункте:**
 
