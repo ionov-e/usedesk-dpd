@@ -55,8 +55,7 @@ $modifyDays = 1;
                 <div class="row">
                     <div class="col">
                         <label class="form-label" for="orderNumberInternal"><strong>*</strong> Внутренний номер посылки
-                            (не
-                            больше 20 символов)</label>
+                            (не больше 20 символов)</label>
                         <input name="orderNumberInternal" id="orderNumberInternal" placeholder="220620-12312"
                                type="text" maxlength="20" class="form-control" required>
                         <div class="invalid-feedback">Должно быть не больше 20 символов</div>
@@ -125,14 +124,14 @@ $modifyDays = 1;
                 <div class="row">
                     <div class="col-8" id="senderCityListParent">
                         <label class="form-label"
-                               for="senderCityFront"><strong>*</strong> <?php echo(CITY_LIST_SEARCH_MODE ? 'Населенный пункт' : 'Адрес'); ?>
+                               for="senderCityFront"><strong>*</strong> <?php echo(CITY_LIST_SEARCH_MODE ? 'Населенный пункт' : 'Адрес (можно вводить до улицы, а можно вплоть до квартиры/офиса)'); ?>
                         </label>
                         <input id="senderCityFront" placeholder="Люберцы" type="text" class="form-control" required>
                     </div>
                     <div class="col-4">
                         <label class="form-label" for="senderHouse"><strong>*</strong> Номер дома</label>
                         <input name="senderAddress[house]" id="senderHouse" placeholder="1" type="text"
-                               class="form-control" required>
+                               class="form-control" required <?php echo(!CITY_LIST_SEARCH_MODE ? 'disabled' : ''); ?> >
                     </div>
                 </div>
                 <input hidden name="senderAddress[city]" id="senderCity" type="text" class="form-control">
@@ -157,22 +156,22 @@ $modifyDays = 1;
                     <div class="col">
                         <label class="form-label" for="senderKorpus">Корпус</label>
                         <input name="senderAddress[houseKorpus]" id="senderKorpus" placeholder="" type="text"
-                               class="form-control">
+                               class="form-control" <?php echo(!CITY_LIST_SEARCH_MODE ? 'disabled' : ''); ?>>
                     </div>
                     <div class="col">
                         <label class="form-label" for="senderStoenie">Строение</label>
                         <input name="senderAddress[str]" id="senderStoenie" placeholder="" type="text"
-                               class="form-control">
+                               class="form-control" <?php echo(!CITY_LIST_SEARCH_MODE ? 'disabled' : ''); ?>>
                     </div>
                     <div class="col">
                         <label class="form-label" for="senderOffice">Офис </label>
                         <input name="senderAddress[office]" id="senderOffice" placeholder="" type="text"
-                               class="form-control">
+                               class="form-control" <?php echo(!CITY_LIST_SEARCH_MODE ? 'disabled' : ''); ?>>
                     </div>
                     <div class="col">
                         <label class="form-label" for="senderFlat">Квартира</label>
                         <input name="senderAddress[flat]" id="senderFlat" placeholder="" type="text"
-                               class="form-control">
+                               class="form-control" <?php echo(!CITY_LIST_SEARCH_MODE ? 'disabled' : ''); ?>>
                     </div>
                 </div>
                 <div hidden>
@@ -358,6 +357,11 @@ $modifyDays = 1;
                                     document.querySelector(`#${ids.Region}`).value = this.dataset.region;
                                     document.querySelector(`#${ids.Street}`).value = this.dataset.street;  // #TODO Error: Cannot set properties of null (setting 'value')
                                     document.querySelector(`#${ids.StreetAbbr}`).value = this.dataset.streetAbbr;
+                                    document.querySelector(`#${ids.House}`).disabled = false;
+                                    document.querySelector(`#${ids.Korpus}`).disabled = false;
+                                    document.querySelector(`#${ids.Stoenie}`).disabled = false;
+                                    document.querySelector(`#${ids.Office}`).disabled = false;
+                                    document.querySelector(`#${ids.Flat}`).disabled = false;
                                     document.querySelector(`#${ids.House}`).value = this.dataset.house;
                                     document.querySelector(`#${ids.Korpus}`).value = this.dataset.korpus;
                                     document.querySelector(`#${ids.Stoenie}`).value = this.dataset.stroenie;
