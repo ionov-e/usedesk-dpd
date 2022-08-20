@@ -21,7 +21,7 @@ class DpdOrder
      *
      * @throws \Exception
      */
-    public static function createOrder(): string
+    public static function createOrder(): void
     {
         $form = self::getFormData();
 
@@ -47,15 +47,14 @@ class DpdOrder
         if ($return->status == 'OK') {
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
-            return "Успешно создано! Ваш ТТН: " . $return->orderNum;
+            header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
         } elseif ($return->status == 'OrderPending') {
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status);
-            return "заказ на доставку принят, но нуждается в ручной доработке сотрудником DPD, (например, по причине " .
-                "того, что адрес доставки не распознан автоматически). Номер заказа будет присвоен ему, когда это доработка будет произведена";
+            header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
         } else {
             Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            return $return->errorMessage; //выводим ошибки
+            echo $return->errorMessage; //выводим ошибки
         }
     }
 

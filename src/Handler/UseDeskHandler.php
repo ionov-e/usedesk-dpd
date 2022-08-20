@@ -44,7 +44,7 @@ class UseDeskHandler
     {
         Log::info(Log::DPD_ORDER, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
         try {
-            echo DpdOrder::createOrder();
+            DpdOrder::createOrder();
         } catch (\Exception $e) { // Можно конечно отдельно обрабатывать SoapFault исключения
             Log::error(Log::DPD_ORDER, "Попытались создать ТТН. Получили Exception: " . $e->getMessage());
             echo "Произошла ошибка";
