@@ -21,7 +21,7 @@
 
   Кнопка, ведущая на [страницу оформления ТТН](#Страница-создания-ттн) для DPD
 
-<img src="/docs/images/usedesk-block-0.png" width="200">
+<img src="http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-block-0.png" width="200">
 
 - **Если уже создана ТТН, осуществив оформление в предыдущем пункте:**
 
@@ -37,13 +37,14 @@
 созданную ТТН". После перехода по кнопке, обновив страницу тикета пользователь увидит прошлый вариант блока с
 возможностью оформления ТТН – буд-то ТТН и не создавали ранее для тикета.
 
-<img src="/docs/images/usedesk-block-1.png" width="200">  или  <img src="/docs/images/usedesk-block-2.png" width="200">
+![block1](http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-block-1.png)
+![block2](http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-block-2.png)
 
 #### Страница создания ТТН
 
 От пользователя требуется заполнить все необходимые поля (помечены звездочке в начале заголовка).
 
-<img src="/docs/images/usedesk-dpd-form.png" width="200">
+![форма](http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-dpd-form.png)
 
 **Особенности:**
 
@@ -142,7 +143,7 @@
 1. Авторизуемся в Usedesk
 2. Переходим на [страницу Блоки](https://secure.usedesk.ru/settings/blocks)
 
-   <img src="/docs/images/usedesk-blocks.png" width="200">
+![blocks](http://gipernew.vertical-web.ru/dpd/docs/images/usedesk-blocks.png)
 4. Убеждаемся, что среди списка предложенных уже нет созданного блока для доставки DPD
 5. Нажимаем на кнопку "Добавить динамический блок"
 6. Заполняем поля:
