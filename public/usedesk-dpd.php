@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') { // Get-запросы
     } else {
         UseDeskHandler::generateNothing(); // Get-запрос: непредвиденный запрос
     }
-} elseif (!empty($_POST[TTN_KEY_NAME])) {
+} elseif (!empty($_POST[INTERNAL_KEY_NAME])) {
     UseDeskHandler::addCreatedReturnOrder(); // Post-запрос: форма из HTML-блока Usedesk на добавление созданного ТТН в БД
 } elseif (!empty($_POST)) { // Post-запрос с содержанием формы
     UseDeskHandler::createDpdOrder();

@@ -92,12 +92,12 @@ class UsedeskBlock
                 $alertText = "Прошлый заказ на доставку ( {$ttnArray[INTERNAL_KEY_NAME]} ) <b>был откреплен от заявки</b>";
             }
         } elseif (ORDER_CANCELED == $ttnArray[STATE_KEY_NAME]) {
-        if (!empty($ttnArray[TTN_KEY_NAME])) {
-            $alertText = "Прошлая ТТН (№ {$ttnArray[TTN_KEY_NAME]}) <b>была отменена</b>";
-        } else { // Случай если ТТН еще не создался, т.е. был получен статус Pending перед удалением
-            $alertText = "Прошлый заказ на доставку ( {$ttnArray[INTERNAL_KEY_NAME]} ) <b>был отменен</b>";
-        }
-    } elseif (ORDER_WRONG == $ttnArray[STATE_KEY_NAME]) {
+            if (!empty($ttnArray[TTN_KEY_NAME])) {
+                $alertText = "Прошлая ТТН (№ {$ttnArray[TTN_KEY_NAME]}) <b>была отменена</b>";
+            } else { // Случай если ТТН еще не создался, т.е. был получен статус Pending перед удалением
+                $alertText = "Прошлый заказ на доставку ( {$ttnArray[INTERNAL_KEY_NAME]} ) <b>был отменен</b>";
+            }
+        } elseif (ORDER_WRONG == $ttnArray[STATE_KEY_NAME]) {
             $alertText = "В прошлый раз был добавлен внутренний заказ с номером '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Такой не существует</b>";
         } elseif (ORDER_DUPLICATE == $ttnArray[STATE_KEY_NAME]) {
             $alertText = "В прошлый раз был добавлен внутренний заказ с номером '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Заказ с таким номером уже существует, создайте новый заказ с другим номером</b>";
