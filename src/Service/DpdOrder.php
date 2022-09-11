@@ -127,13 +127,13 @@ class DpdOrder
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
             } else {
                 Log::error(Log::UD_BLOCK, "Получили {$return->status} при статус-чеке: $logMessage");
+                $ttn = null;
                 if (!empty($return->orderNum)) {
                     $ttn = $return->orderNum;
                 } elseif (!empty($ttnArray[TTN_KEY_NAME])) {
                     $ttn = $ttnArray[TTN_KEY_NAME];
-                } else {
-                    $ttn = null;
                 }
+
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $ttn, Log::UD_BLOCK);
             }
         }
