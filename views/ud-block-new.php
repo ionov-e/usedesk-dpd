@@ -17,8 +17,8 @@
 <?php else : // Это для режима возврата ?>
     <form id="dpd-form" method="get" action="<?= URL_SCRIPT_PHP ?>" target="_blank">
         <div class="form-group">
-            <label class="form-label">Внутренний номер посылки</label>
-            <input name="<?= INTERNAL_KEY_NAME ?>" type="text" class="form-control" value="" required>
+            <label class="form-label">Внутренний номер посылки (разрешены латиница, цифры и дефис)</label>
+            <input oninput="this.value=this.value.replace(/[^A-Za-z0-9-\s]/g,'');" name="<?= INTERNAL_KEY_NAME ?>" type="text" class="form-control" value="" required>
         </div>
         <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $args[TICKET_ID_KEY_NAME] ?>">
         <div class="form-group">
@@ -106,7 +106,7 @@
 
 
     <div id="dpd-after" style="display: none">
-        <h4>После создания заявки на возврат нажмите кнопку:</h4>
+        <h4>После создания заявки на возврат нажмите кнопку</h4>
         <button class="btn btn-info"
                 onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">
             Обновить статус
