@@ -97,8 +97,6 @@ class UsedeskBlock
                 }
                 break;
             case ORDER_WRONG:
-                $alertText = "Для этого запроса был добавлен внутренний номер заказа: {$ttnArray[INTERNAL_KEY_NAME]}<br><b>Такой номер не существует</b>";
-                break;
             case ORDER_NOT_FOUND:
                 $alertText = "Для этого запроса был добавлен внутренний номер заказа: {$ttnArray[INTERNAL_KEY_NAME]}<br><b>В службе DPD такой номер не найден</b>";
                 break;

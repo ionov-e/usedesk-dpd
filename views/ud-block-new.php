@@ -106,7 +106,7 @@
 
 
     <div id="dpd-after" style="display: none">
-        <h3>После создания заявки на возврат нажмите кнопку</h3>
+        <h4>После создания заявки на возврат нажмите кнопку:</h4>
         <button class="btn btn-info"
                 onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">
             Обновить статус
