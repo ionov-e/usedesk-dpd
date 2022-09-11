@@ -6,6 +6,7 @@
 
 namespace App\Service;
 
+use App\DB;
 use App\Log;
 
 class UsedeskBlock
@@ -59,15 +60,50 @@ class UsedeskBlock
      */
     public static function getBlockHtml(int $ticketId): string
     {
-        $ttnArray = DpdOrder::checkOrder($ticketId);
+        $ttnArray = DB::getTtnArray($ticketId);
 
-        if ($ttnArray[STATE_JSON_KEY] == 'OK') {  // Случай, если ТТН со статусом ОК
-            return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY], TICKET_ID_KEY_NAME => $ticketId]);
-        } elseif ($ttnArray[STATE_JSON_KEY] == 'OrderPending') {  // Случай: OrderPending. Номер не ТТН, а внутренний передается
-            return UsedeskBlock::renderPhp(self::UD_BLOCK_PENDING, [TTN_JSON_KEY => $ttnArray[TTN_JSON_KEY], TICKET_ID_KEY_NAME => $ticketId]);
+        if (empty($ttnArray)) { // Если для тикета еще ничего не создавалось - сразу возвращаем HTML
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => '']);
         }
-        // Случай, если ТТН не создано для тикета
-        return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId]);
+
+        // Имеет смысл проверять изменения статуса только у этих статусов:
+        if (in_array($ttnArray[STATE_KEY_NAME], [ORDER_OK, ORDER_PENDING, ORDER_UNCHECKED])) {
+            $ttnArray = DpdOrder::checkOrder($ticketId, $ttnArray);
+        }
+
+        if (empty($ttnArray)) { // Если вернулся пустой массив - опять отрендерим буд-то в БД ничего и не было
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => '']);
+        }
+
+        if (ORDER_OK == $ttnArray[STATE_KEY_NAME]) {  // Случай, если ТТН со статусом ОК
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_KEY_NAME => $ttnArray[TTN_KEY_NAME], DATE_KEY_NAME => $ttnArray[DATE_KEY_NAME], TICKET_ID_KEY_NAME => $ticketId]);
+        }
+
+        if (ORDER_PENDING == $ttnArray[STATE_KEY_NAME]) {  // Случай: OrderPending. Номер не ТТН, а внутренний передается
+            return UsedeskBlock::renderPhp(self::UD_BLOCK_PENDING, [INTERNAL_KEY_NAME => $ttnArray[INTERNAL_KEY_NAME], DATE_KEY_NAME => $ttnArray[DATE_KEY_NAME], TICKET_ID_KEY_NAME => $ticketId]);
+        }
+
+        // В оставшихся "если" просто формируем содержание alert вверху блока
+        $alertText = '';
+        if (ORDER_DELETED == $ttnArray[STATE_KEY_NAME]) {
+            if (!empty($ttnArray[TTN_KEY_NAME])) {
+                $alertText = "Прошлая ТТН (№ {$ttnArray[TTN_KEY_NAME]}) <b>была откреплена от заявки</b>";
+            } else { // Случай если ТТН еще не создался, т.е. был получен статус Pending перед удалением
+                $alertText = "Прошлый заказ на доставку ( {$ttnArray[INTERNAL_KEY_NAME]} ) <b>был откреплен от заявки</b>";
+            }
+        } elseif (ORDER_CANCELED == $ttnArray[STATE_KEY_NAME]) {
+        if (!empty($ttnArray[TTN_KEY_NAME])) {
+            $alertText = "Прошлая ТТН (№ {$ttnArray[TTN_KEY_NAME]}) <b>была отменена</b>";
+        } else { // Случай если ТТН еще не создался, т.е. был получен статус Pending перед удалением
+            $alertText = "Прошлый заказ на доставку ( {$ttnArray[INTERNAL_KEY_NAME]} ) <b>был отменен</b>";
+        }
+    } elseif (ORDER_WRONG == $ttnArray[STATE_KEY_NAME]) {
+            $alertText = "В прошлый раз был добавлен внутренний заказ с номером '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Такой не существует</b>";
+        } elseif (ORDER_DUPLICATE == $ttnArray[STATE_KEY_NAME]) {
+            $alertText = "В прошлый раз был добавлен внутренний заказ с номером '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Заказ с таким номером уже существует, создайте новый заказ с другим номером</b>";
+        }
+
+        return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => $alertText]);
 
     }
 

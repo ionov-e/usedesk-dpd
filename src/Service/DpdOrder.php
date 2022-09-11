@@ -17,7 +17,7 @@ class DpdOrder
     /**
      * Создание заказа на отправку в DPD
      *
-     * @return string
+     * @return void
      *
      * @throws \Exception
      */
@@ -44,43 +44,39 @@ class DpdOrder
         // OrderError – заказ на доставку не может быть создан по причине, указанной в поле errorMessage.
         // OrderCancelled – заказ отменен
 
-        if ($return->status == 'OK') {
+        if (ORDER_OK == $return->status) { // Единственный ответ с № ТТН
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
             header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
-        } elseif ($return->status == 'OrderPending') {
+        } elseif (ORDER_ERROR == $return->status) {
+            Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
+            echo $return->errorMessage; //выводим ошибки
+        } else { // Здесь остаются на вариант статусы: OrderPending, OrderDuplicate, OrderCancelled. Все записываем, но без ТТН
             Log::warning(Log::DPD_ORDER, "Тикет $ticketId: Получил статус 'OrderPending'. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
             DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status);
             header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
-        } else {
-            Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            echo $return->errorMessage; //выводим ошибки
         }
     }
 
     /**
-     * Статус-чек заказа в DPD. Возвращает актуальный массив тикета форамата { int => $int, state => $statusDPD, ttn => $ttn }
+     * Возвращает массив тикета из ответа статус-чека заказа в DPD. Перезаписывает в БД при изменении статуса
      *
-     * Особенность: возвращается пустой архив и если Тикет в "БД" не найден, и если статус изменился (на "плохой") и удалили из БД
+     * Если статус не изменился - в итоге вернет точно такой же массив как и переданный в параметре
      *
      * @param string $ticketId
+     * @param array $ttnArray
      *
      * @return array
      *
      * @throws \Exception
      */
-    public static function checkOrder(string $ticketId): array
+    public static function checkOrder(string $ticketId, array $ttnArray): array
     {
-        $ttnArray = DB::getTtn($ticketId);
 
-        if (empty($ttnArray)) {
-            return [];
-        }
-
-        // Формирование массива для отправки
+        // Формирование массива для отправки на проверку статуса в DPD
         $arData = array();
         $arData['auth'] = self::getAuthArray();
-        $arData['order'] = array('orderNumberInternal' => $ttnArray[INTERNAL_JSON_KEY]);
+        $arData['order'] = array('orderNumberInternal' => $ttnArray[INTERNAL_KEY_NAME]);
         $arRequest['orderStatus'] = $arData; // помещаем запрос в orders
 
         Log::debug(Log::UD_BLOCK, "Подготовлен массив для получения статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
@@ -96,30 +92,55 @@ class DpdOrder
         $return = $responseStd->return;
 
         // Если статус не изменился - возвращаем значения из "БД"
-        if ($return->status == $ttnArray[STATE_JSON_KEY]) {
-            Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус не изменился: {$ttnArray[STATE_JSON_KEY]}");
+        if ($return->status == $ttnArray[STATE_KEY_NAME]) {
+            Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус не изменился: {$ttnArray[STATE_KEY_NAME]}");
             return $ttnArray;
         }
 
         // Если статус изменился - записываем изменения в "БД"
 
-        $logMessage = "Тикет $ticketId поменял свой статус с " . $ttnArray[STATE_JSON_KEY] . " на " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
+        $logMessage = "Тикет $ticketId имел в БД статус: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
 
-        if ($return->status == 'OK') {
+        if (ORDER_OK == $return->status) {
             Log::info(Log::UD_BLOCK, $logMessage);
             return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, Log::UD_BLOCK);
-        } elseif ($return->status == 'OrderPending') {
-            Log::warning(Log::UD_BLOCK, $logMessage);
-            return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, Log::UD_BLOCK);
-        } else { // Все остальные случаи - удаляем из БД
-            Log::error(Log::UD_BLOCK, $logMessage);
-            $dataArrays = DB::getDbAsArray(Log::UD_BLOCK);
-            DB::removeTicketFromArray($dataArrays, $ticketId, Log::UD_BLOCK);
-            if (DB::overwriteDb($dataArrays, Log::UD_BLOCK)) {
-                Log::info(Log::UD_BLOCK, "Успешно удалили: $ticketId");;
-            }
-            return [];
         }
+
+        if (ORDER_PENDING == $return->status || ORDER_DUPLICATE == $return->status) {
+            Log::warning(Log::UD_BLOCK, $logMessage);
+            return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, Log::UD_BLOCK);
+        }
+
+        if (ORDER_ERROR == $return->status) {
+            if (ORDER_UNCHECKED == $ttnArray[STATE_KEY_NAME]) {
+                Log::warning(Log::UD_BLOCK, "Ставим ORDER_WRONG: $logMessage");
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+            } else {
+                Log::error(Log::UD_BLOCK, "Неожиданно получили {$return->status} при статус-чеке: $logMessage");
+                return [];
+            }
+        }
+
+        if (ORDER_CANCELED == $return->status) {
+            if (ORDER_UNCHECKED == $ttnArray[STATE_KEY_NAME]) {
+                Log::warning(Log::UD_BLOCK, "Ставим ORDER_WRONG: $logMessage");
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+            } else {
+                Log::error(Log::UD_BLOCK, "Получили {$return->status} при статус-чеке: $logMessage");
+                if (!empty($return->orderNum)) {
+                    $ttn = $return->orderNum;
+                } elseif (!empty($ttnArray[TTN_KEY_NAME])) {
+                    $ttn = $ttnArray[TTN_KEY_NAME];
+                } else {
+                    $ttn = null;
+                }
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $ttn, Log::UD_BLOCK);
+            }
+        }
+
+        // По идее сюда мы не должны дойти. Все случа в "если" предусмотрены
+        Log::critical(Log::UD_BLOCK, "Непредвиденный случай. $logMessage");
+        return [];
     }
 
     /**

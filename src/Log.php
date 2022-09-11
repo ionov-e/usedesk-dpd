@@ -13,6 +13,7 @@ class Log
     const DPD_FORM = 'dpd_form';
     const DPD_ORDER = 'dpd_order';
     const UD_BLOCK = 'ud_block';
+    const UD_ADD_TTN = 'ud_add_ttn';
     const UD_DEL_TTN = 'ud_del_ttn';
     const UNKNOWN = 'unknown';
 

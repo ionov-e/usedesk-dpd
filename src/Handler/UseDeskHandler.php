@@ -10,7 +10,7 @@ use App\Service\UsedeskBlock;
 class UseDeskHandler
 {
 
-    const UD_DELETE_TTN_SUCCESS_PATH = PROJECT_DIR . '/views/ud-delete-ttn-success.php';
+    const UD_DELETE_TTN_SUCCESS_PATH = PROJECT_DIR . '/views/ud-delete-ttn-success.php'; #TODO Универсальный Вью, с возможным сообщение вверху
     const UD_DELETE_TTN_ERROR_PATH = PROJECT_DIR . '/views/ud-delete-ttn-error.php';
 
     /**
@@ -33,6 +33,26 @@ class UseDeskHandler
         }
 
         echo json_encode(array('html' => $htmlString), JSON_UNESCAPED_UNICODE); // Вывод web-блока UseDesk
+    }
+
+
+    /**
+     * Добавляет в БД присланный внутренний номер заказа для обратной отправки в DPD
+     *
+     * @return void
+     */
+    public static function addCreatedReturnOrder(): void
+    {
+        Log::info(Log::UD_ADD_TTN, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+
+        try {
+            Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_POST), JSON_UNESCAPED_UNICODE);
+            $ticketId = $_POST[TICKET_ID_KEY_NAME];
+            $internalId = $_POST[INTERNAL_KEY_NAME];
+            DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, Log::UD_ADD_TTN);
+        } catch (\Exception $e) {
+            Log::error(Log::UD_ADD_TTN, "Exception: " . $e->getMessage());
+        }
     }
 
     /**
@@ -79,13 +99,13 @@ class UseDeskHandler
             $error = false;
             $ticketId = $_GET[DELETE_TICKET_ID_KEY_NAME];
             $dataArrays = DB::getDbAsArray(Log::UD_DEL_TTN);
-            if (!DB::removeTicketFromArray($dataArrays, $ticketId, Log::UD_DEL_TTN)) {
+            if (!DB::changeTicketState($dataArrays, $ticketId, ORDER_DELETED, Log::UD_DEL_TTN)) {
                 Log::warning(Log::UD_DEL_TTN, "Не был найден тикет: $ticketId");
                 $error = true;
             }
 
             if (!$error && DB::overwriteDb($dataArrays, Log::UD_DEL_TTN)) {
-                Log::info(Log::UD_DEL_TTN, "Успешно удален тикет: $ticketId");
+                Log::info(Log::UD_DEL_TTN, "Успешно поняли на удаленный статус тикету: $ticketId");
                 include(self::UD_DELETE_TTN_SUCCESS_PATH);
                 return;
             }
