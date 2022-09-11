@@ -103,8 +103,7 @@ class UseDeskHandler
             }
 
             if (!$error && DB::overwriteDb($dataArrays, Log::UD_DEL_TTN)) {
-                Log::info(Log::UD_DEL_TTN, "Успешно поняли на удаленный статус тикету: $ticketId");
-                include(self::UD_DELETE_TTN_SUCCESS_PATH);
+                Log::info(Log::UD_DEL_TTN, "Успешно поменяли на удаленный статус тикету: $ticketId");
                 return;
             }
         } catch (\Exception $e) {
@@ -116,7 +115,6 @@ class UseDeskHandler
             $logMsg .= ". Словили Exception: " . $exceptionMsg;
         }
         Log::error(Log::UD_DEL_TTN, $logMsg);
-        include(self::UD_DELETE_TTN_ERROR_PATH);
     }
 
     /**
