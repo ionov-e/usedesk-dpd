@@ -10,7 +10,7 @@ require_once "../vendor/autoload.php";
 require_once "../config/global.php";
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {     // Get-запросы. Почти все закинуто в них - чтобы работало легче с незащищенным http
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {     // Get-запросы
     if (!empty($_GET[CITY_SEARCH_KEY_NAME])) {
         DpdCityList::searchCitiesJson();        // Get-запрос: из "нашей" формы при вводе в поле Город. Возвращаем Json
     } elseif (!empty($_GET[INTERNAL_KEY_NAME])) {

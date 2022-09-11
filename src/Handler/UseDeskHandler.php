@@ -43,7 +43,7 @@ class UseDeskHandler
         Log::info(Log::UD_ADD_TTN, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
 
         try {
-            Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_POST), JSON_UNESCAPED_UNICODE);
+            Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_GET), JSON_UNESCAPED_UNICODE);
             $ticketId = $_GET[TICKET_ID_KEY_NAME];
             $internalId = $_GET[INTERNAL_KEY_NAME];
             DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, Log::UD_ADD_TTN);
@@ -104,6 +104,7 @@ class UseDeskHandler
 
             if (!$error && DB::overwriteDb($dataArrays, Log::UD_DEL_TTN)) {
                 Log::info(Log::UD_DEL_TTN, "Успешно поменяли на удаленный статус тикету: $ticketId");
+                echo "Успешно отвязана заказ DPD от заявки. Можете закрыть эту страницу"; #TODO Удалить после SSL
                 return;
             }
         } catch (\Exception $e) {
@@ -114,6 +115,8 @@ class UseDeskHandler
         if (!empty($exceptionMsg)) {
             $logMsg .= ". Словили Exception: " . $exceptionMsg;
         }
+        echo "Не удалось отвязать заказ DPD от заявки. Можете закрыть эту страницу. Если после обновления страницы заявки 
+        в Usedesk и там все еще есть кнопка 'Отвязать заказ от заявки' - свяжитесь с разработчиками DPD-модуля для Usedesk"; #TODO Удалить после SSL
         Log::error(Log::UD_DEL_TTN, $logMsg);
     }
 
