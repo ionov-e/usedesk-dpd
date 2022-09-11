@@ -10,9 +10,6 @@ use App\Service\UsedeskBlock;
 class UseDeskHandler
 {
 
-    const UD_DELETE_TTN_SUCCESS_PATH = PROJECT_DIR . '/views/ud-delete-ttn-success.php'; #TODO Универсальный Вью, с возможным сообщение вверху
-    const UD_DELETE_TTN_ERROR_PATH = PROJECT_DIR . '/views/ud-delete-ttn-error.php';
-
     /**
      * Возвращает HTML содержимое для отображения в UseDesk-е на страницах тикета (при включенном блоке)
      *
