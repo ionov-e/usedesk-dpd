@@ -36,7 +36,7 @@ const INTERNAL_KEY_NAME = 'int';                                    // Под т
 const DATE_KEY_NAME = 'date';                                       // Под таким ключом хранится в JSON дата обновления/создания в БД. Обновление происходит только в случае смены статуса
 const TICKET_ID_KEY_NAME = 'ticket_id';                             // Название параметра в Post-запросе от UseDesk
 const CITY_SEARCH_KEY_NAME = "city_search";                         // Название параметра в Get-запросе из формы при вводе в поле город
-const DELETE_TICKET_ID_KEY_NAME = 'delete_ticket_id';               // Название параметра в Get-запросе для удаления из БД тикета с ТТН
+const DELETE_TICKET_ID_KEY_NAME = 'delete_ticket_id';               // Название параметра в Post-запросе для удаления из БД тикета с ТТН
 const ALERT_TEXT_KEY_NAME = 'alert_text';                           // Произвольное название переменной (для избежания опечатки)
 
 const ORDER_OK = 'OK';                              // Статус заказа (от DPD): OK

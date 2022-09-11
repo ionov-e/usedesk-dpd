@@ -15,17 +15,54 @@
            href='<?= URL_SCRIPT_PHP ?>?<?= TICKET_ID_KEY_NAME ?>=<?= $args[TICKET_ID_KEY_NAME] ?>'>Оформить ТТН</a>
     </div>
 <?php else : // Это для режима возврата ?>
-    <form id="dpd-form" method="post" action="<?= URL_SCRIPT_PHP ?>" target="_blank">
-        <div class="input-group">
-            <span class="input-group-text">Внутренний номер посылки</span>
+    <form id="dpd-form" method="get" action="<?= URL_SCRIPT_PHP ?>" target="_blank">
+        <div class="form-group">
+            <label class="form-label">Внутренний номер посылки</label>
             <input name="<?= INTERNAL_KEY_NAME ?>" type="text" class="form-control" value="" required>
         </div>
         <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $args[TICKET_ID_KEY_NAME] ?>">
-        <button class='btn btn-green' type="submit" onclick="document.querySelector('#dpd-form').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">Создать ТТН</button>
+        <div class="form-group">
+            <button class='btn btn-success' type="submit"
+                    onclick="document.querySelector('#dpd-form').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">
+                Создать ТТН
+            </button>
+            <a href="#spoiler-1" data-toggle="collapse" class="btn btn-primary">Показать инструкцию к использованию</a>
+            <div class="collapse" id="spoiler-1">
+                <div class="well">
+                    <div class="list-group">
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">Если заказ еще не создан</h4>
+                            <p class="list-group-item-text">
+                            <ol>
+                                <li>Введите в поле "Внутренний номер посылки"</li>
+                                <li>Нажать кнопку "Создать ТТН"</li>
+                                <li>Система в новой вкладке откроет для вас страницу заполнения формы для оформления
+                                    возврата. Согласитесь на возможное предупреждение от вашего браузера
+                                </li>
+                                <li>Заполните форму оформления возврата</li>
+                                <li>Все готово! После успешного заполнения формы DPD: либо заново откройте эту страницу,
+                                    либо нажмите на появившуюся кнопку "Обновить статус"
+                                </li>
+                            </ol>
+                            </p>
+                        </li>
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">Заказ в DPD уже создан</h4>
+                            <p class="list-group-item-text">
+                                Введите </p>
+                        </li>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
+
+
     <div id="dpd-after" style="display: none">
-       <h3>После создания заявки на возврат нажмите кнопку</h3>
-       <button onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">Обновить статус</button>
+        <h3>После создания заявки на возврат нажмите кнопку</h3>
+        <button onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">
+            Обновить статус
+        </button>
     </div>
 
 <?php endif; ?>

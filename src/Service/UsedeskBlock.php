@@ -97,13 +97,13 @@ class UsedeskBlock
                 }
                 break;
             case ORDER_WRONG:
-                $alertText = "Для этого запроса был добавлен внутренний номер заказа '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Такой номер не существует</b>";
+                $alertText = "Для этого запроса был добавлен внутренний номер заказа: {$ttnArray[INTERNAL_KEY_NAME]}<br><b>Такой номер не существует</b>";
                 break;
             case ORDER_NOT_FOUND:
-                $alertText = "Для этого запроса был добавлен внутренний номер заказа '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>В службе DPD такой номер не найден</b>";
+                $alertText = "Для этого запроса был добавлен внутренний номер заказа: {$ttnArray[INTERNAL_KEY_NAME]}<br><b>В службе DPD такой номер не найден</b>";
                 break;
             case ORDER_DUPLICATE:
-                $alertText = "Для этого запроса был добавлен внутренний номер заказа '{$ttnArray[INTERNAL_KEY_NAME]}'. <b>Заказ с таким номером уже существует, создайте новый заказ с другим внутренним номером</b>";
+                $alertText = "Для этого запроса был добавлен внутренний номер заказа: {$ttnArray[INTERNAL_KEY_NAME]}<br><b>Заказ с таким номером уже существует, создайте новый заказ с другим внутренним номером</b>";
                 break;
         }
         return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => $alertText]);

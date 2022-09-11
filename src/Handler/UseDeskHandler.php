@@ -44,8 +44,8 @@ class UseDeskHandler
 
         try {
             Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_POST), JSON_UNESCAPED_UNICODE);
-            $ticketId = $_POST[TICKET_ID_KEY_NAME];
-            $internalId = $_POST[INTERNAL_KEY_NAME];
+            $ticketId = $_GET[TICKET_ID_KEY_NAME];
+            $internalId = $_GET[INTERNAL_KEY_NAME];
             DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, Log::UD_ADD_TTN);
             header(sprintf("Location: https://www.dpd.ru/return.do2?1002029585$%s", $internalId));
         } catch (\Exception $e) {
