@@ -91,15 +91,24 @@ class DpdOrder
 
         $return = $responseStd->return;
 
-        // Если статус не изменился - возвращаем значения из "БД"
+        // Если статус изменился - записываем изменения в "БД" (исключение: статус "не найден". Возможно перезапишем)
+        #TODO redo save to DB at the end
+
+        $logMessage = "Тикет $ticketId имел в БД статус: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
+
+        if (ORDER_NOT_FOUND == $return->status) {
+            Log::info(Log::UD_BLOCK, $logMessage);
+            if ((new \DateTime($ttnArray[DATE_KEY_NAME]))->modify("+1 day")->getTimestamp() < time()) {
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+            }
+            return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, Log::UD_BLOCK);
+        }
+
+        // Если статус не изменился и статус был найден - возвращаем значения из "БД"
         if ($return->status == $ttnArray[STATE_KEY_NAME]) {
             Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус не изменился: {$ttnArray[STATE_KEY_NAME]}");
             return $ttnArray;
         }
-
-        // Если статус изменился - записываем изменения в "БД"
-
-        $logMessage = "Тикет $ticketId имел в БД статус: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
 
         if (ORDER_OK == $return->status) {
             Log::info(Log::UD_BLOCK, $logMessage);
