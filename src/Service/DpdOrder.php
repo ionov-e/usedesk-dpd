@@ -177,6 +177,7 @@ class DpdOrder
             $countUpdated = 0;
             $countDoneBefore = 0;
             $countTooOld = 0;
+            $countEmpty = 0;
             $countSame = 0;
 
             foreach ($dataArrays as $ticketId => $ttnArray) {
@@ -200,8 +201,14 @@ class DpdOrder
                 }
 
                 $lastProcessState = self::getLastProcessState($ttnArray[TTN_KEY_NAME], Log::CRON_LAST_UPDATE);
-                // Если получили пустое значение или такое же, как в БД - не перезаписываем БД
-                if (empty($lastProcessState) || $lastProcessState == $ttnArray[LAST_KEY_NAME]) {
+                // Если получили пустое значение - не перезаписываем БД
+                if (empty($lastProcessState)) {
+                    $countEmpty++;
+                    continue;
+                }
+
+                // Если получили такое же значение, как в БД - не перезаписываем БД
+                if ($lastProcessState == $ttnArray[LAST_KEY_NAME]) {
                     $countSame++;
                     continue;
                 }
@@ -210,7 +217,7 @@ class DpdOrder
                 $countUpdated++;
             }
 
-            Log::info(Log::CRON_LAST_UPDATE, "Обновили тикетов: $countUpdated/$countTotal. Пропущено: 'несозданных' $countNotCreated, 'готовых' $countDoneBefore, 'старых' $countTooOld, 'таких же' $countSame");
+            Log::info(Log::CRON_LAST_UPDATE, "Обновили тикетов: $countUpdated/$countTotal. Пропущено: 'несозданных' $countNotCreated, 'готовых' $countDoneBefore, 'старых' $countTooOld, 'пустых' $countEmpty, 'таких же' $countSame");
 
         } catch (\Exception $e) {
             Log::error(Log::CRON_LAST_UPDATE, "Exception: " . $e->getMessage());
@@ -232,14 +239,14 @@ class DpdOrder
 
             $arData = array();
             $arData['auth'] = self::getAuthArray();
-            $arData['clientParcelNr'] = $ttnNumber;
+            $arData['dpdOrderNr'] = $ttnNumber;
             $arRequest['request'] = $arData; // помещаем запрос
 
             Log::debug($logCategory, "Запрос на чек статуса выполнения посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
             // IDE не подсказывает, но Soap может кидать SoapFault исключения
             $client = new \SoapClient (self::URL_TRACING);
-            $responseStd = $client->getStatesByClientParcel($arRequest); //делаем запрос в DPD
+            $responseStd = $client->getStatesByDPDOrder($arRequest); //делаем запрос в DPD
             Log::debug($logCategory, "Ответ на чек статуса выполнения посылки:" . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
 
             // StdClass. Все входить внутри одного свойства 'return'
@@ -255,6 +262,7 @@ class DpdOrder
 
             $states = $responseStd->return->states;
             if (!is_array($states)) { // Если статус возвращается 1 - не будет массива
+                Log::debug($logCategory, "Получили статус выполнения: {$states->newState}");
                 return $states->newState;
             }
 
