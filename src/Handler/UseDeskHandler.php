@@ -17,7 +17,7 @@ class UseDeskHandler
      */
     public static function generateUsedeskBlockHtml(): void
     {
-        Log::info(Log::UD_BLOCK, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        Log::info(Log::UD_BLOCK, "Старт. IP: ");
 
         header("Content-Type: application/json");
         try {
@@ -40,7 +40,7 @@ class UseDeskHandler
      */
     public static function addCreatedReturnOrder(): void
     {
-        Log::info(Log::UD_ADD_TTN, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        Log::info(Log::UD_ADD_TTN, "Старт. IP: ");
 
         try {
             Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_GET), JSON_UNESCAPED_UNICODE);
@@ -60,7 +60,7 @@ class UseDeskHandler
      */
     public static function createDpdOrder(): void
     {
-        Log::info(Log::DPD_ORDER, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        Log::info(Log::DPD_ORDER, "Старт. IP: ");
         try {
             DpdOrder::createOrder();
         } catch (\Exception $e) { // Можно конечно отдельно обрабатывать SoapFault исключения
@@ -76,7 +76,7 @@ class UseDeskHandler
      */
     public static function generateFormForOrder(): void
     {
-        Log::info(Log::DPD_FORM, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        Log::info(Log::DPD_FORM, "Старт. IP: ");
 
         $ticketId = $_GET[TICKET_ID_KEY_NAME];
 
@@ -92,7 +92,7 @@ class UseDeskHandler
      */
     public static function deleteFromDb(): void
     {
-        Log::info(Log::UD_DEL_TTN, "Старт. IP: " . $_SERVER["REMOTE_ADDR"]);
+        Log::info(Log::UD_DEL_TTN, "Старт. IP: ");
         try {
             $error = false;
             $ticketId = $_GET[DELETE_TICKET_ID_KEY_NAME];
@@ -127,7 +127,7 @@ class UseDeskHandler
      */
     public static function generateNothing(): void
     {
-        Log::info(Log::UNKNOWN, "Непредвиденный Get-запрос с IP: " . $_SERVER["REMOTE_ADDR"] . " С содержимым: " . json_encode($_GET, JSON_UNESCAPED_UNICODE));
+        Log::info(Log::UNKNOWN, "Непредвиденный Get-запрос с содержимым: " . json_encode($_GET, JSON_UNESCAPED_UNICODE));
         echo "Не были переданы все обязательные параметры";
     }
 }

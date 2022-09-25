@@ -90,7 +90,7 @@ class Log
 
         $logFileAddress = $logFolder . DIRECTORY_SEPARATOR . date('d') . '.log';
 
-        $logString = date('H:i:s') . " [$level][$category] $message" . PHP_EOL;
+        $logString = date('H:i:s') . " [$level][{$_SERVER["REMOTE_ADDR"]}][$category] $message" . PHP_EOL;
         file_put_contents($logFileAddress, $logString, FILE_APPEND);
     }
 }
