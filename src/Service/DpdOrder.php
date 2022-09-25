@@ -262,17 +262,15 @@ class DpdOrder
 
             $states = $responseStd->return->states;
             if (!is_array($states)) { // Если статус возвращается 1 - не будет массива
-                Log::debug($logCategory, "Получили статус выполнения: {$states->newState}");
-                return $states->newState;
-            }
-
-            //Поиск последнего статуса в массиве
-            $maxTransitionTime = ''; //transitionTime
-            $lastNewState = ''; //newState
-            foreach ($states as $state) {
-                if ($state->transitionTime > $maxTransitionTime) { // Если новее
-                    $maxTransitionTime = $state->transitionTime;
-                    $lastNewState = $state->newState;
+                $lastNewState = $states->newState;
+            } else { // Поиск последнего статуса в массиве
+                $maxTransitionTime = ''; //transitionTime
+                $lastNewState = ''; //newState
+                foreach ($states as $state) {
+                    if ($state->transitionTime > $maxTransitionTime) { // Если новее
+                        $maxTransitionTime = $state->transitionTime;
+                        $lastNewState = $state->newState;
+                    }
                 }
             }
 
