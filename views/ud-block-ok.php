@@ -6,7 +6,10 @@
  * */ ?>
 <div id="dpd-default-dynamic">
     <div class="alert alert-success" role="alert">
-        Номер ТТН: <b><?= $args[TTN_KEY_NAME] ?></b> (от <?= $args[DATE_KEY_NAME] ?>)
+        Заказ DPD создан. Номер ТТН: <b><?= $args[TTN_KEY_NAME] ?></b> (от <?= $args[DATE_KEY_NAME] ?>)
+        <?php if (!empty($args[LAST_KEY_NAME])) : // Если не пустое содержимое последнего статуса?>
+            <br>Статус выполнения заказа: <b><?= $args[LAST_KEY_NAME] ?></b>
+        <?php endif; ?>
     </div>
     <a class='btn btn-red' target="_blank"
        href='<?= URL_SCRIPT_PHP ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $args[TICKET_ID_KEY_NAME] ?>'

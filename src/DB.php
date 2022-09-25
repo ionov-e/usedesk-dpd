@@ -3,11 +3,12 @@
  * Класс для работы с БД
  *
  * Записи хранятся в JSON в таком виде:
- * [  $ticketId => {int => $int, state => $statusDPD, ttn => $ttn, date => 2022-08-15},    $ticketId2 => {...},  ...  ]
+ * [  $ticketId => {int => $int, state => $statusDPD, ttn => $ttn, last => $last, date => 2022-08-15},    $ticketId2 => {...},  ...  ]
  *
  * $ticketId - ID Тикета из UseDesk,
  * int - внутренний №заказа,
- * statusDPD - полученный статус ТТН от DPD
+ * statusDPD - полученный статус создания ТТН от DPD
+ * last - полученный статус выполнения ТТН от DPD (если получили)
  * ttn - номер ТТН от DPD (если получили)
  * date - дата записи (может быть повторная при перезаписи - случай смены статуса заказа)
  *
@@ -25,13 +26,14 @@ class DB
      * @param string $internal
      * @param string $statusDPD
      * @param string|null $ttn
+     * @param string|null $last
      * @param string $logCategory
      *
      * @return array
      *
      * @throws \Exception
      */
-    public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $logCategory = Log::DPD_ORDER): array
+    public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $last = null, string $logCategory = Log::DPD_ORDER): array
     {
 
         if (!file_exists(DATA_JSON)) { // Если БД еще не существует
@@ -58,8 +60,11 @@ class DB
         $newArray[INTERNAL_KEY_NAME] = $internal;
         $newArray[STATE_KEY_NAME] = $statusDPD;
         $newArray[DATE_KEY_NAME] = date("Y-m-d");
-        if (!is_null($ttn)) {   // Например, если Pending в статусе - не пришлют
+        if (!is_null($ttn)) {   // Например, если Pending в статусе создания - не пришлют
             $newArray[TTN_KEY_NAME] = $ttn;
+        }
+        if (!empty($last)) {   // Не будет ничего, даже если статус создания ОК, но до получения на терминале. Проверка на пустую строку или null
+            $newArray[LAST_KEY_NAME] = $last;
         }
 
         $dataArrays[$ticketId] = $newArray;

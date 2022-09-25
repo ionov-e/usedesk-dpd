@@ -62,11 +62,11 @@ class UsedeskBlock
     {
         $ttnArray = DB::getTtnArray($ticketId);
 
-        if (empty($ttnArray)) { // Если для тикета еще ничего не создавалось - сразу возвращаем HTML
+        if (empty($ttnArray)) { // Если для тикета еще ничего не создавалось - сразу возвращаем HTML для создания заказа доставки
             return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => '']);
         }
 
-        // Имеет смысл проверять изменения статуса только у этих статусов:
+        // Имеет смысл проверять изменения статуса СОЗДАНИЯ заказа только у этих статусов создания (в случае ОК - еще и статус выполнения возвращает):
         if (in_array($ttnArray[STATE_KEY_NAME], [ORDER_OK, ORDER_PENDING, ORDER_UNCHECKED, ORDER_NOT_FOUND])) {
             $ttnArray = DpdOrder::checkOrder($ticketId, $ttnArray);
         }
@@ -79,7 +79,10 @@ class UsedeskBlock
 
         switch ($ttnArray[STATE_KEY_NAME]) {
             case ORDER_OK: // Случай, если ТТН со статусом ОК
-                return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_KEY_NAME => $ttnArray[TTN_KEY_NAME], DATE_KEY_NAME => $ttnArray[DATE_KEY_NAME], TICKET_ID_KEY_NAME => $ticketId]);
+                if (!empty($ttnArray[LAST_KEY_NAME])){ // Превращение статуса выполнения заказа в понятный вид (могли создать временную переменную, а не использовать элемент массива)
+                    $ttnArray[LAST_KEY_NAME] = self::getLastStateReadable($ttnArray[LAST_KEY_NAME]);
+                }
+                return UsedeskBlock::renderPhp(self::UD_BLOCK_OK, [TTN_KEY_NAME => $ttnArray[TTN_KEY_NAME], DATE_KEY_NAME => $ttnArray[DATE_KEY_NAME], TICKET_ID_KEY_NAME => $ticketId, LAST_KEY_NAME => $ttnArray[LAST_KEY_NAME]]);
             case ORDER_PENDING: // Случай: OrderPending. Номер не ТТН, а внутренний передается
                 return UsedeskBlock::renderPhp(self::UD_BLOCK_PENDING, [INTERNAL_KEY_NAME => $ttnArray[INTERNAL_KEY_NAME], DATE_KEY_NAME => $ttnArray[DATE_KEY_NAME], TICKET_ID_KEY_NAME => $ticketId]);
             case ORDER_DELETED:
@@ -105,6 +108,46 @@ class UsedeskBlock
                 break;
         }
         return UsedeskBlock::renderPhp(self::UD_BLOCK_NEW_VIEW, [TICKET_ID_KEY_NAME => $ticketId, ALERT_TEXT_KEY_NAME => $alertText]);
+    }
+
+    /**
+     * Возвращает значение статуса выполнения заказа в понятном виде
+     *
+     * @param string $lastState
+     *
+     * @return string
+     */
+    private static function getLastStateReadable(string $lastState): string
+    {
+        switch ($lastState) {
+            case LAST_NEW_ORDER_BY_CLIENT:
+                return 'оформлен новый заказ по инициативе клиента';
+            case LAST_NOT_DONE:
+                return "заказ отменен";
+            case LAST_ON_TERMINAL_PICKUP:
+                return "посылка находится на терминале приема отправления";
+            case LAST_ON_ROAD:
+                return "посылка находится в пути (внутренняя перевозка DPD)";
+            case LAST_ON_TERMINAL:
+                return "посылка находится на транзитном терминале";
+            case LAST_ON_TERMINAL_DELIVERY:
+                return "посылка находится на терминале доставки";
+            case LAST_DELIVERING:
+                return "посылка выведена на доставку";
+            case LAST_DELIVERED:
+                return "посылка доставлена получателю";
+            case LAST_LOST:
+                return "посылка утеряна";
+            case LAST_PROBLEM:
+                return "с посылкой возникла проблемная ситуация";
+            case LAST_RETURNED_FROM_DELIVERY:
+                return "посылка возвращена с доставки";
+            case LAST_NEW_ORDER_BY_DPD:
+                return "оформлен новый заказ по инициативе DPD";
+            default:
+                Log::critical(Log::UD_BLOCK, "Непредвиденный статус выполнения заказа: $lastState");
+                return "Не получилось узнать последний статус";
+        }
     }
 
     /**

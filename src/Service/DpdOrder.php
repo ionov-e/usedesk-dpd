@@ -13,6 +13,7 @@ class DpdOrder
 {
 
     const URL_ORDER = URL_DPD_DOMAIN . "services/order2?wsdl";
+    const URL_TRACING = URL_DPD_DOMAIN . "services/tracing1-1?wsdl";
 
     /**
      * Создание заказа на отправку в DPD
@@ -46,7 +47,8 @@ class DpdOrder
 
         if (ORDER_OK == $return->status) { // Единственный ответ с № ТТН
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum);
+            $lastProcessState = self::getLastProcessState($return->orderNumberInternal);
+            DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState);
             header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
         } elseif (ORDER_ERROR == $return->status) {
             Log::error(Log::DPD_ORDER, "Тикет $ticketId: ОШИБКА. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
@@ -79,42 +81,59 @@ class DpdOrder
         $arData['order'] = array('orderNumberInternal' => $ttnArray[INTERNAL_KEY_NAME]);
         $arRequest['orderStatus'] = $arData; // помещаем запрос в orders
 
-        Log::debug(Log::UD_BLOCK, "Подготовлен массив для получения статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+        Log::debug(Log::UD_BLOCK, "Запрос на чек создания статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
         // IDE не подсказывает, но Soap может кидать SoapFault исключения
         $client = new \SoapClient (self::URL_ORDER);
         $responseStd = $client->getOrderStatus($arRequest); //делаем запрос в DPD
 
-        // StdClass.
+        Log::debug(Log::UD_BLOCK, "Ответ на чек создания статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+
+        if (!property_exists($responseStd, "return")) { // Если статусы не возвращаются
+            Log::critical(Log::UD_BLOCK, "В ответе не было свойства 'return'");
+            return [];
+        }
+
+        // StdClass. Все входить внутри одного свойства 'return'
         //Обязательные ключи: orderNumberInternal, status.
         //Необязательные: orderNum, errorMessage, pickupDate, dateFlag (последние 2 - ни разу не наблюдал)
 
         $return = $responseStd->return;
 
         // Если статус изменился - записываем изменения в "БД" (исключение: статус "не найден". Возможно перезапишем)
-        $logMessage = "Тикет $ticketId имел в БД статус: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
+        $logMessage = "Тикет $ticketId имел в БД статус создания: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
+
+        // Перепроверим последний статус выполнения заказа.
+        if (ORDER_OK == $return->status && LAST_DELIVERED != $ttnArray[LAST_KEY_NAME]) { // Иначе нет смысла проверять
+            $lastProcessState = self::getLastProcessState($return->orderNumberInternal);
+            // Если получили непустое значение и отличается от прошлого - перезаписываем БД
+            if (!empty($lastProcessState) && $lastProcessState != $ttnArray[LAST_KEY_NAME]) {
+                Log::info(Log::UD_BLOCK, "Вносим в БД статус выполнения заказа: '$lastProcessState' вместо '{$ttnArray[LAST_KEY_NAME]}'");
+                $ttnArray = DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
+            }
+        }
 
         switch ($return->status) {
             case ORDER_NOT_FOUND:
                 Log::info(Log::UD_BLOCK, $logMessage);
                 if ((new \DateTime($ttnArray[DATE_KEY_NAME]))->modify("+1 day")->getTimestamp() < time()) {
-                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, null, Log::UD_BLOCK);
                 }
-                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, Log::UD_BLOCK);
-            case $ttnArray[STATE_KEY_NAME]: // Если статус не изменился и статус был найден - возвращаем значения из "БД"
-                Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус не изменился: {$ttnArray[STATE_KEY_NAME]}");
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, null, Log::UD_BLOCK);
+            case $ttnArray[STATE_KEY_NAME]: // Если статус не изменился и статус был найден - возвращаем значения из "БД" без перезаписи БД
+                Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус создания не изменился: {$ttnArray[STATE_KEY_NAME]}");
                 return $ttnArray;
             case ORDER_OK:
                 Log::info(Log::UD_BLOCK, $logMessage);
-                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, Log::UD_BLOCK);
+                return $ttnArray;
             case ORDER_PENDING:
             case ORDER_DUPLICATE:
                 Log::warning(Log::UD_BLOCK, $logMessage);
-                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, Log::UD_BLOCK);
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, null, Log::UD_BLOCK);
             case ORDER_ERROR:
                 if (ORDER_UNCHECKED == $ttnArray[STATE_KEY_NAME]) {
                     Log::warning(Log::UD_BLOCK, "Ставим ORDER_WRONG: $logMessage");
-                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, null, Log::UD_BLOCK);
                 } else {
                     Log::error(Log::UD_BLOCK, "Неожиданно получили {$return->status} при статус-чеке: $logMessage");
                     return [];
@@ -122,20 +141,80 @@ class DpdOrder
             case ORDER_CANCELED:
                 if (ORDER_UNCHECKED == $ttnArray[STATE_KEY_NAME]) {
                     Log::warning(Log::UD_BLOCK, "Ставим ORDER_WRONG: $logMessage");
-                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, Log::UD_BLOCK);
+                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, null, Log::UD_BLOCK);
                 } else {
                     Log::error(Log::UD_BLOCK, "Получили {$return->status} при статус-чеке: $logMessage");
+                    // Пытаемся найти №ТТН вначале в ответе на запрос, потом в прошлой записи БД. Иначе ничего
                     $ttn = null;
                     if (!empty($return->orderNum)) {
                         $ttn = $return->orderNum;
                     } elseif (!empty($ttnArray[TTN_KEY_NAME])) {
                         $ttn = $ttnArray[TTN_KEY_NAME];
                     }
-                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $ttn, Log::UD_BLOCK);
+                    return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $ttn, null, Log::UD_BLOCK);
                 }
             default: // По идее сюда мы не должны дойти. Все случаи в "если" предусмотрены
                 Log::critical(Log::UD_BLOCK, "Непредвиденный случай. $logMessage");
                 return [];
+        }
+    }
+
+    /**
+     * Возвращает последний статус выполнения посылки. Если не получили - возвращает пустую строку
+     *
+     * @param string $internalNumber
+     *
+     * @return string
+     */
+    public static function getLastProcessState(string $internalNumber): string
+    {
+        try {
+
+            $arData = array();
+            $arData['auth'] = self::getAuthArray();
+            $arData['clientOrderNr'] = $internalNumber;
+            $arRequest['request'] = $arData; // помещаем запрос
+
+            Log::debug(Log::UD_BLOCK, "Запрос на чек статуса выполнения посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+
+            // IDE не подсказывает, но Soap может кидать SoapFault исключения
+            $client = new \SoapClient (self::URL_TRACING);
+            $responseStd = $client->getStatesByClientOrder($arRequest); //делаем запрос в DPD
+            Log::debug(Log::UD_BLOCK, "Ответ на чек статуса выполнения посылки:" . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
+
+            // StdClass. Все входить внутри одного свойства 'return'
+            if (!property_exists($responseStd, "return")) { // Если статусы не возвращаются
+                Log::critical(Log::UD_BLOCK, "В ответе не было свойства 'return'");
+                return "";
+            }
+
+            // Может содержать 'states' (массив), а может нет (случай, если еще нет получен на терминал, или уже прошло 90 дней хранения последнего статуса выполнения посылки)
+            if (!property_exists($responseStd->return, "states")) { // Если статусы не возвращаются
+                return "";
+            }
+
+            //Поиск последнего статуса в массиве
+            $maxTransitionTime = ''; //transitionTime
+            $lastNewState = ''; //newState
+            foreach ($responseStd->return->states as $state) {
+                if ($state->transitionTime > $maxTransitionTime) { // Если новее
+                    $maxTransitionTime = $state->transitionTime;
+                    $lastNewState = $state->newState;
+                }
+            }
+
+            if (empty($lastNewState)) {
+                Log::critical(Log::UD_BLOCK, "Ошибка в логике поиска последнего статуса выполнения посылки");
+                return "";
+            }
+
+            Log::debug(Log::UD_BLOCK, "Получили статус выполнения: $lastNewState");
+
+            return $lastNewState;
+
+        } catch (\Exception $e) {
+            Log::error(Log::UD_BLOCK, "Exception:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
+            return '';
         }
     }
 
