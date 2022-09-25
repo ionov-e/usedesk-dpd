@@ -286,7 +286,9 @@ class DpdOrder
             return $lastNewState;
 
         } catch (\SoapFault $e) {
-            if (!$e->getMessage() == "Данные не найдены") {
+            if ($e->getMessage() == "Данные не найдены" || $e->getMessage() == "Посылки еще не поступили либо дата заказа ранее подключения клиента к сервису") {
+                Log::debug($logCategory, "$ttnNumber на сервере DPD не обнаружен");
+            } else {
                 Log::error($logCategory, "SoapFault:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
             }
         } catch (\Exception $e) {
