@@ -15,6 +15,7 @@ class Log
     const UD_BLOCK = 'ud_block';
     const UD_ADD_TTN = 'ud_add_ttn';
     const UD_DEL_TTN = 'ud_del_ttn';
+    const CRON_LAST_UPDATE = 'cron_last_up';
     const UNKNOWN = 'unknown';
 
     protected static $instance = null;

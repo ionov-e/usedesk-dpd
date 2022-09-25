@@ -17,7 +17,7 @@ class UseDeskHandler
      */
     public static function generateUsedeskBlockHtml(): void
     {
-        Log::info(Log::UD_BLOCK, "Старт. IP: ");
+        Log::info(Log::UD_BLOCK, "Старт");
 
         header("Content-Type: application/json");
         try {
@@ -40,7 +40,7 @@ class UseDeskHandler
      */
     public static function addCreatedReturnOrder(): void
     {
-        Log::info(Log::UD_ADD_TTN, "Старт. IP: ");
+        Log::info(Log::UD_ADD_TTN, "Старт");
 
         try {
             Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_GET), JSON_UNESCAPED_UNICODE);
@@ -60,7 +60,7 @@ class UseDeskHandler
      */
     public static function createDpdOrder(): void
     {
-        Log::info(Log::DPD_ORDER, "Старт. IP: ");
+        Log::info(Log::DPD_ORDER, "Старт");
         try {
             DpdOrder::createOrder();
         } catch (\Exception $e) { // Можно конечно отдельно обрабатывать SoapFault исключения
@@ -76,7 +76,7 @@ class UseDeskHandler
      */
     public static function generateFormForOrder(): void
     {
-        Log::info(Log::DPD_FORM, "Старт. IP: ");
+        Log::info(Log::DPD_FORM, "Старт");
 
         $ticketId = $_GET[TICKET_ID_KEY_NAME];
 
@@ -92,7 +92,7 @@ class UseDeskHandler
      */
     public static function deleteFromDb(): void
     {
-        Log::info(Log::UD_DEL_TTN, "Старт. IP: ");
+        Log::info(Log::UD_DEL_TTN, "Старт");
         try {
             $error = false;
             $ticketId = $_GET[DELETE_TICKET_ID_KEY_NAME];

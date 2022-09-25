@@ -36,8 +36,9 @@ class DB
     public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $last = null, string $logCategory = Log::DPD_ORDER): array
     {
 
-        if (!file_exists(DATA_JSON)) { // Если БД еще не существует
+        $dataArrays = self::getDbAsArray($logCategory);
 
+        if (empty($dataArrays)) {
             Log::warning($logCategory, "Первая запись в БД");
 
             // Проверяет создана ли соответствующая папка. Создает, если не существует
@@ -47,11 +48,7 @@ class DB
                     throw new \Exception("Возникла ошибка");
                 }
             }
-
-            $dataArrays = [];
-
         } else { // Если БД существует - получаем данные и перезаписываем прошлое значение (если существует)
-            $dataArrays = self::getDbAsArray($logCategory);
             unset($dataArrays[$ticketId]);
         }
 
@@ -106,12 +103,6 @@ class DB
      */
     public static function getTtnArray(int $ticketId, string $logCategory = Log::UD_BLOCK): array
     {
-        if (!file_exists(DATA_JSON)) { // Если БД еще не существует
-            Log::warning($logCategory, "БД еще не существует");
-            return [];
-        }
-
-        // Если БД существует
 
         $dataArrays = self::getDbAsArray($logCategory);
 
@@ -139,6 +130,11 @@ class DB
      */
     public static function getDbAsArray(string $logCategory = Log::DPD_ORDER): array
     {
+        if (!file_exists(DATA_JSON)) { // Если БД еще не существует
+            Log::warning($logCategory, "БД еще не существует");
+            return [];
+        }
+
         $dataArrays = json_decode(file_get_contents(DATA_JSON), true);
 
         if (is_null($dataArrays)) {
@@ -150,7 +146,7 @@ class DB
     }
 
     /**
-     * Меняет в массиве "БД" (первый параметр) статус в указанном тикете и возвращает true, если тикет был найден внутри
+     * Меняет в массиве "БД" (первый параметр) статус создания заказа в указанном тикете и возвращает true, если тикет был найден внутри
      *
      * @param array $dataArrays
      * @param string $ticketId
@@ -162,7 +158,7 @@ class DB
     public static function changeTicketState(array &$dataArrays, string $ticketId, string $newState, string $logCategory = Log::DPD_ORDER): bool
     {
         if (!empty($dataArrays[$ticketId])) {
-            Log::info($logCategory, "В тикете $ticketId в БД меняем статус '{$dataArrays[$ticketId][STATE_KEY_NAME]}' на '$newState'");
+            Log::info($logCategory, "В тикете $ticketId в БД меняем статус создания заказа '{$dataArrays[$ticketId][STATE_KEY_NAME]}' на '$newState'");
             $dataArrays[$ticketId][STATE_KEY_NAME] = $newState;
             return true;
         }

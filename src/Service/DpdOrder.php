@@ -47,7 +47,7 @@ class DpdOrder
 
         if (ORDER_OK == $return->status) { // Единственный ответ с № ТТН
             Log::info(Log::DPD_ORDER, "Тикет $ticketId: Успешно создан заказ в DPD. Ответ: " . json_encode($return, JSON_UNESCAPED_UNICODE));
-            $lastProcessState = self::getLastProcessState($return->orderNumberInternal);
+            $lastProcessState = self::getLastProcessState($return->orderNum);
             DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState);
             header("Location: https://secure.usedesk.ru/tickets/$ticketId"); // Возвращаем на страницу тикета
         } elseif (ORDER_ERROR == $return->status) {
@@ -105,7 +105,7 @@ class DpdOrder
 
         // Перепроверим последний статус выполнения заказа.
         if (ORDER_OK == $return->status && LAST_DELIVERED != $ttnArray[LAST_KEY_NAME]) { // Иначе нет смысла проверять
-            $lastProcessState = self::getLastProcessState($return->orderNumberInternal);
+            $lastProcessState = self::getLastProcessState($return->orderNum);
             // Если получили непустое значение и отличается от прошлого - перезаписываем БД
             if (!empty($lastProcessState) && $lastProcessState != $ttnArray[LAST_KEY_NAME]) {
                 Log::info(Log::UD_BLOCK, "Вносим в БД статус выполнения заказа: '$lastProcessState' вместо '{$ttnArray[LAST_KEY_NAME]}'");
@@ -160,31 +160,91 @@ class DpdOrder
     }
 
     /**
+     * Обновляет статусы выполнения заказов DPD
+     *
+     * @return void
+     */
+    public static function updateProcessStates(): void
+    {
+        Log::info(Log::CRON_LAST_UPDATE, "Старт");
+        try {
+
+            $dataArrays = DB::getDbAsArray(Log::CRON_LAST_UPDATE);
+
+            // Переменные для лога
+            $countTotal = count($dataArrays);
+            $countNotCreated = 0;
+            $countUpdated = 0;
+            $countDoneBefore = 0;
+            $countTooOld = 0;
+            $countSame = 0;
+
+            foreach ($dataArrays as $ticketId => $ttnArray) {
+
+                // Не будем проверять новый статус выполнения, если статус создания не ОК
+                if (ORDER_OK != $ttnArray[STATE_KEY_NAME]) {
+                    $countNotCreated++;
+                    continue;
+                }
+
+                // Не будем проверять новый статус выполнения, если уже получен "окончательный"
+                if (!empty($ttnArray[LAST_KEY_NAME]) || in_array($ttnArray[LAST_KEY_NAME], [LAST_DELIVERED, LAST_NOT_DONE])) {
+                    $countDoneBefore++;
+                    continue;
+                }
+
+                // Не будем проверять новый статус выполнения, если с последней записи в БД > 90 дней
+                if ((new \DateTime($ttnArray[DATE_KEY_NAME]))->modify("+90 day")->getTimestamp() < time()) {
+                    $countTooOld++;
+                    continue;
+                }
+
+                $lastProcessState = self::getLastProcessState($ttnArray[TTN_KEY_NAME], Log::CRON_LAST_UPDATE);
+                // Если получили пустое значение или такое же, как в БД - не перезаписываем БД
+                if (empty($lastProcessState) || $lastProcessState == $ttnArray[LAST_KEY_NAME]) {
+                    $countSame++;
+                    continue;
+                }
+
+                DB::saveTicketToDb($ticketId, $ttnArray[INTERNAL_KEY_NAME], $ttnArray[STATE_KEY_NAME], $ttnArray[TTN_KEY_NAME], $lastProcessState, Log::CRON_LAST_UPDATE);
+                $countUpdated++;
+            }
+
+            Log::info(Log::CRON_LAST_UPDATE, "Обновили тикетов: $countUpdated/$countTotal. Пропущено: 'несозданных' $countNotCreated, 'готовых' $countDoneBefore, 'старых' $countTooOld, 'таких же' $countSame");
+
+        } catch (\Exception $e) {
+            Log::error(Log::CRON_LAST_UPDATE, "Exception: " . $e->getMessage());
+        }
+    }
+
+
+    /**
      * Возвращает последний статус выполнения посылки. Если не получили - возвращает пустую строку
      *
-     * @param string $internalNumber
+     * @param string $ttnNumber
+     * @param string $logCategory
      *
      * @return string
      */
-    public static function getLastProcessState(string $internalNumber): string
+    public static function getLastProcessState(string $ttnNumber, string $logCategory = Log::UD_BLOCK): string
     {
         try {
 
             $arData = array();
             $arData['auth'] = self::getAuthArray();
-            $arData['clientOrderNr'] = $internalNumber;
+            $arData['clientParcelNr'] = $ttnNumber;
             $arRequest['request'] = $arData; // помещаем запрос
 
-            Log::debug(Log::UD_BLOCK, "Запрос на чек статуса выполнения посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+            Log::debug($logCategory, "Запрос на чек статуса выполнения посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
             // IDE не подсказывает, но Soap может кидать SoapFault исключения
             $client = new \SoapClient (self::URL_TRACING);
-            $responseStd = $client->getStatesByClientOrder($arRequest); //делаем запрос в DPD
-            Log::debug(Log::UD_BLOCK, "Ответ на чек статуса выполнения посылки:" . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
+            $responseStd = $client->getStatesByClientParcel($arRequest); //делаем запрос в DPD
+            Log::debug($logCategory, "Ответ на чек статуса выполнения посылки:" . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
 
             // StdClass. Все входить внутри одного свойства 'return'
             if (!property_exists($responseStd, "return")) { // Если статусы не возвращаются
-                Log::critical(Log::UD_BLOCK, "В ответе не было свойства 'return'");
+                Log::critical($logCategory, "В ответе не было свойства 'return'");
                 return "";
             }
 
@@ -193,10 +253,15 @@ class DpdOrder
                 return "";
             }
 
+            $states = $responseStd->return->states;
+            if (!is_array($states)) { // Если статус возвращается 1 - не будет массива
+                return $states->newState;
+            }
+
             //Поиск последнего статуса в массиве
             $maxTransitionTime = ''; //transitionTime
             $lastNewState = ''; //newState
-            foreach ($responseStd->return->states as $state) {
+            foreach ($states as $state) {
                 if ($state->transitionTime > $maxTransitionTime) { // Если новее
                     $maxTransitionTime = $state->transitionTime;
                     $lastNewState = $state->newState;
@@ -204,18 +269,22 @@ class DpdOrder
             }
 
             if (empty($lastNewState)) {
-                Log::critical(Log::UD_BLOCK, "Ошибка в логике поиска последнего статуса выполнения посылки");
+                Log::critical($logCategory, "Ошибка в логике поиска последнего статуса выполнения посылки");
                 return "";
             }
 
-            Log::debug(Log::UD_BLOCK, "Получили статус выполнения: $lastNewState");
+            Log::debug($logCategory, "Получили статус выполнения: $lastNewState");
 
             return $lastNewState;
 
+        } catch (\SoapFault $e) {
+            if (!$e->getMessage() == "Данные не найдены") {
+                Log::error($logCategory, "SoapFault:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
+            }
         } catch (\Exception $e) {
-            Log::error(Log::UD_BLOCK, "Exception:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
-            return '';
+            Log::error($logCategory, "Exception:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
         }
+        return '';
     }
 
     /**
