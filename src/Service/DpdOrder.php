@@ -189,7 +189,7 @@ class DpdOrder
                 }
 
                 // Не будем проверять новый статус выполнения, если уже получен "окончательный"
-                if (!empty($ttnArray[LAST_KEY_NAME]) || in_array($ttnArray[LAST_KEY_NAME], [LAST_DELIVERED, LAST_NOT_DONE])) {
+                if (!empty($ttnArray[LAST_KEY_NAME]) && in_array($ttnArray[LAST_KEY_NAME], [LAST_DELIVERED, LAST_NOT_DONE])) {
                     $countDoneBefore++;
                     continue;
                 }
@@ -267,7 +267,7 @@ class DpdOrder
                 $maxTransitionTime = ''; //transitionTime
                 $lastNewState = ''; //newState
                 foreach ($states as $state) {
-                    if ($state->transitionTime > $maxTransitionTime) { // Если новее
+                    if ($state->transitionTime >= $maxTransitionTime) { // Если новее или такое же (бывает, что одинаковые - но последнее актуальнее)
                         $maxTransitionTime = $state->transitionTime;
                         $lastNewState = $state->newState;
                     }
