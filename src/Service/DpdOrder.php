@@ -87,7 +87,7 @@ class DpdOrder
         $client = new \SoapClient (self::URL_ORDER);
         $responseStd = $client->getOrderStatus($arRequest); //делаем запрос в DPD
 
-        Log::debug(Log::UD_BLOCK, "Ответ на чек создания статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
+        Log::debug(Log::UD_BLOCK, "Ответ на чек создания статуса посылки: " . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
 
         if (!property_exists($responseStd, "return")) { // Если статусы не возвращаются
             Log::critical(Log::UD_BLOCK, "В ответе не было свойства 'return'");
@@ -104,13 +104,9 @@ class DpdOrder
         $logMessage = "Тикет $ticketId имел в БД статус создания: " . $ttnArray[STATE_KEY_NAME] . ". В DPD: " . $return->status . PHP_EOL . json_encode($return, JSON_UNESCAPED_UNICODE);
 
         // Перепроверим последний статус выполнения заказа.
+        $lastProcessState = null;
         if (ORDER_OK == $return->status && LAST_DELIVERED != $ttnArray[LAST_KEY_NAME]) { // Иначе нет смысла проверять
             $lastProcessState = self::getLastProcessState($return->orderNum);
-            // Если получили непустое значение и отличается от прошлого - перезаписываем БД
-            if (!empty($lastProcessState) && $lastProcessState != $ttnArray[LAST_KEY_NAME]) {
-                Log::info(Log::UD_BLOCK, "Вносим в БД статус выполнения заказа: '$lastProcessState' вместо '{$ttnArray[LAST_KEY_NAME]}'");
-                $ttnArray = DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
-            }
         }
 
         switch ($return->status) {
@@ -120,12 +116,17 @@ class DpdOrder
                     return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, null, Log::UD_BLOCK);
                 }
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, null, Log::UD_BLOCK);
-            case $ttnArray[STATE_KEY_NAME]: // Если статус не изменился и статус был найден - возвращаем значения из "БД" без перезаписи БД
+            case $ttnArray[STATE_KEY_NAME]: // Если статус создания не изменился и был найден
                 Log::info(Log::UD_BLOCK, "Проверили тикет: $ticketId - статус создания не изменился: {$ttnArray[STATE_KEY_NAME]}");
+                // Если получили непустое значение в статусе выполнения заказа и отличается от прошлого - перезаписываем БД
+                if (!empty($lastProcessState) && $lastProcessState != $ttnArray[LAST_KEY_NAME]) {
+                    Log::info(Log::UD_BLOCK, "Вносим в БД статус выполнения заказа: '$lastProcessState' вместо '{$ttnArray[LAST_KEY_NAME]}'");
+                    $ttnArray = DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
+                }
                 return $ttnArray;
             case ORDER_OK:
                 Log::info(Log::UD_BLOCK, $logMessage);
-                return $ttnArray;
+                return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
             case ORDER_PENDING:
             case ORDER_DUPLICATE:
                 Log::warning(Log::UD_BLOCK, $logMessage);
