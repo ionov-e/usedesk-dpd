@@ -10,7 +10,7 @@
  * statusDPD - полученный статус создания ТТН от DPD
  * last - полученный статус выполнения ТТН от DPD (если получили)
  * ttn - номер ТТН от DPD (если получили)
- * date - дата записи (может быть повторная при перезаписи - случай смены статуса заказа)
+ * date - дата создания записи
  *
  */
 
@@ -48,7 +48,10 @@ class DB
                     throw new \Exception("Возникла ошибка");
                 }
             }
-        } else { // Если БД существует - получаем данные и перезаписываем прошлое значение (если существует)
+        } else { // Если БД существует - перезаписываем прошлое значение (если существует). Но сохраняем прошлую дату создания
+            if (!empty($dataArrays[$ticketId][DATE_KEY_NAME])) {
+                $date = $dataArrays[$ticketId][DATE_KEY_NAME];
+            }
             unset($dataArrays[$ticketId]);
         }
 
@@ -56,7 +59,7 @@ class DB
         $newArray = [];
         $newArray[INTERNAL_KEY_NAME] = $internal;
         $newArray[STATE_KEY_NAME] = $statusDPD;
-        $newArray[DATE_KEY_NAME] = date("Y-m-d");
+        $newArray[DATE_KEY_NAME] = $date ?? date("Y-m-d");
         if (!is_null($ttn)) {   // Например, если Pending в статусе создания - не пришлют
             $newArray[TTN_KEY_NAME] = $ttn;
         }
