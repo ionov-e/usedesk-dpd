@@ -11,10 +11,12 @@
             <br>Статус выполнения заказа: <b><?= $args[LAST_KEY_NAME] ?></b>
         <?php endif; ?>
     </div>
-    <a class='btn btn-red' target="_blank"
-       href='<?= URL_SCRIPT_PHP ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $args[TICKET_ID_KEY_NAME] ?>'
-       onclick="document.querySelector('#dpd-default-dynamic').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">Отвязать
-        заказ от заявки</a>
+    <?php if ($args[LAST_KEY_NAME] != "посылка доставлена получателю") : // Если не пустое содержимое последнего статуса?>
+        <a class='btn btn-red' target="_blank"
+           href='<?= URL_SCRIPT_PHP ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $args[TICKET_ID_KEY_NAME] ?>'
+           onclick="document.querySelector('#dpd-default-dynamic').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">Отвязать
+            заказ от заявки</a>
+    <?php endif; ?>
 </div>
 <div id="dpd-after" style="display: none">
     <h4>Запрос на отвязку от заявки отправлена. Нажмите кнопку для обновления данного блока:</h4>
