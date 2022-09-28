@@ -7,9 +7,14 @@
 <div id="dpd-default-dynamic">
     <div class="alert alert-success" role="alert">
         Заказ DPD создан. Номер ТТН: <b><?= $args[TTN_KEY_NAME] ?></b> (от <?= $args[DATE_KEY_NAME] ?>)
-        <?php if (!empty($args[LAST_KEY_NAME])) : // Если не пустое содержимое последнего статуса?>
-            <br>Статус выполнения заказа: <b><?= $args[LAST_KEY_NAME] ?></b>
-        <?php endif; ?>
+
+        <br>Статус выполнения заказа: <b>
+            <?php if (!empty($args[LAST_KEY_NAME])) :?>
+                <?= $args[LAST_KEY_NAME] ?>
+            <?php else: ?>
+                Еще не прибыл на терминал DPD от отправителя
+            <?php endif; ?>
+        </b>
     </div>
     <?php if ($args[LAST_KEY_NAME] != "посылка доставлена получателю") : // Если не пустое содержимое последнего статуса?>
         <a class='btn btn-red' target="_blank"
