@@ -317,6 +317,9 @@ class DpdOrder
                 unset($element);
             }
         }
+
+        $form = array_map('trim', $form);
+
         return $form;
     }
 
