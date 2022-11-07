@@ -1,32 +1,130 @@
 <?php
 /**
- * Содержимое для HTML-блока UseDesk в случае, если ТТН для тикета нет в "БД"
+ * Содержимое для HTML-блока UseDesk
  *
- * @var $args array Аргументы извне
- * */ ?>
+ * @var $args array Аргументы извне. Сейчас выглядят: $ticketId => [[], []]
+ * */
+$ticketId = array_key_first($args);
+$ticketArray = $args[$ticketId];
+?>
 
-<?php if ($args[ALERT_TEXT_KEY_NAME]) : // Если есть что сообщить пользователю ?>
-    <div id="dpd-alert" class="alert alert-warning" role="alert"><?= $args[ALERT_TEXT_KEY_NAME] ?></div>
-<?php endif; ?>
+    <div id="dpd-default-dynamic">
+        <?php if (empty($ticketArray)) : ?>
+
+            <div class="alert alert-warning" role="alert">
+                Не было добавлено никаких заказов DPD
+            </div>
+
+        <?php else: ?>
+            <h4>Созданные заказы DPD:</h4>
+
+            <?php foreach ($ticketArray as $ttnArray): ?>
+
+                <?php
+                if (!empty($ttnArray[LAST_KEY_NAME])) {
+                    switch ($ttnArray[LAST_KEY_NAME]) {
+                        case LAST_DELIVERED:
+                            $alertStyle = 'success';
+                            break;
+                        case LAST_NEW_ORDER_BY_CLIENT:
+                        case LAST_LOST:
+                        case LAST_PROBLEM:
+                        case LAST_RETURNED_FROM_DELIVERY:
+                        case LAST_NEW_ORDER_BY_DPD:
+                            $alertStyle = 'danger';
+                            break;
+                        case LAST_NOT_DONE:
+                            $alertStyle = 'warning';
+                            break;
+                        case LAST_ON_TERMINAL_PICKUP:
+                        case LAST_ON_ROAD:
+                        case LAST_ON_TERMINAL:
+                        case LAST_ON_TERMINAL_DELIVERY:
+                        case LAST_DELIVERING:
+                            $alertStyle = 'info';
+                            break;
+                        default:
+                            $alertStyle = 'minimal';
+                    }
+                } else {
+                    switch ($ttnArray[STATE_KEY_NAME]) {
+                        case ORDER_OK:
+                            $alertStyle = 'info';
+                            break;
+                        case ORDER_PENDING:
+                        case ORDER_CANCELED:
+                            $alertStyle = 'warning';
+                            break;
+                        case ORDER_NOT_FOUND:
+                        case ORDER_WRONG:
+                        case ORDER_DUPLICATE:
+                            $alertStyle = 'danger';
+                            break;
+                        case ORDER_DELETED:
+                        default:
+                            $alertStyle = 'minimal';
+                    }
+                }
+                ?>
+
+                <div class="alert alert-<?= $alertStyle ?>" role="alert">
+
+                    <div>
+
+                        <?php if (!empty($ttnArray[TTN_KEY_NAME])) : ?>
+                            ТТН № "<b><?= $ttnArray[TTN_KEY_NAME] ?></b>"
+                        <?php else: ?>
+                            Внутренний № "<b><?= $ttnArray[INTERNAL_KEY_NAME] ?></b>"
+                        <?php endif; ?>
+
+                        — Добавлен <b><?= $ttnArray[DATE_KEY_NAME] ?></b>
+                        . Статус: <b><?= $ttnArray[STATE_READABLE_KEY_NAME] ?></b>
+                    </div>
+                    <?php if (!in_array($ttnArray[LAST_KEY_NAME], [LAST_DELIVERED]) && !in_array($ttnArray[STATE_KEY_NAME], [ORDER_DELETED])) : // Если не пустое содержимое последнего статуса?>
+                        <a class='btn btn-red' target="_blank"
+                           href='<?= URL_SCRIPT_PHP ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>&<?= INTERNAL_KEY_NAME ?>=<?= $ttnArray[INTERNAL_KEY_NAME] ?>'
+                           onclick="document.querySelector('#dpd-default-dynamic').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">Отвязать
+                            заказ от заявки</a>
+                    <?php endif; ?>
+
+                </div>
+
+            <?php endforeach; ?>
+
+        <?php endif; ?>
+
+    </div>
+
+    <div id="dpd-after" style="display: none">
+        <h4>Запрос отправлен. Нажмите кнопку для обновления данного блока:</h4>
+        <button class="btn btn-info"
+                onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">
+            Обновить статус
+        </button>
+    </div>
+
+    <h4>Привязать новый заказ DPD:</h4>
 
 <?php if (!RETURN_ORDER_MODE) : // Это для режима обычного заказа?>
     <div>
         <a class='btn btn-green' target=”_blank”
-           href='<?= URL_SCRIPT_PHP ?>?<?= TICKET_ID_KEY_NAME ?>=<?= $args[TICKET_ID_KEY_NAME] ?>'>Оформить ТТН</a>
+           href='<?= URL_SCRIPT_PHP ?>?<?= TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>'>Оформить ТТН</a>
     </div>
 <?php else : // Это для режима возврата ?>
     <form id="dpd-form" method="get" action="<?= URL_SCRIPT_PHP ?>" target="_blank">
         <div class="form-group">
             <label class="form-label">Внутренний номер посылки (разрешены латиница, цифры и дефис)</label>
-            <input oninput="this.value=this.value.replace(/[^A-Za-z0-9-\s]/g,'');" name="<?= INTERNAL_KEY_NAME ?>" type="text" class="form-control" value="" required>
+            <input oninput="this.value=this.value.replace(/[^A-Za-z0-9-\s]/g,'');" name="<?= INTERNAL_KEY_NAME ?>"
+                   type="text" class="form-control" value="" required>
         </div>
-        <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $args[TICKET_ID_KEY_NAME] ?>">
+        <input type="hidden" name="<?= TICKET_ID_KEY_NAME ?>" value="<?= $ticketId ?>">
         <div class="form-group">
             <button class='btn btn-success' type="submit"
                     onclick="document.querySelector('#dpd-form').style.display = 'none';document.querySelector('#dpd-alert').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">
                 Создать ТТН
             </button>
-            <a href="#spoiler-1" data-toggle="collapse" class="btn btn-primary">Показать инструкцию к использованию</a>
+            <a href="#spoiler-1" data-toggle="collapse" class="btn btn-primary">Показать инструкцию привязки нового
+                заказа</a>
             <div class="collapse" id="spoiler-1">
                 <div class="well">
                     <div class="list-group">
@@ -104,14 +202,4 @@
         </div>
     </form>
 
-
-    <div id="dpd-after" style="display: none">
-        <h4>После создания заявки на возврат нажмите кнопку</h4>
-        <button class="btn btn-info"
-                onclick="document.querySelector('#dpd-after').closest('.dynamic-block').querySelector('a.block-reload-button').click()">
-            Обновить статус
-        </button>
-    </div>
-
 <?php endif; ?>
-
