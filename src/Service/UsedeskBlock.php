@@ -81,9 +81,12 @@ class UsedeskBlock
     }
 
     /**
+     * Отправляет комментарий на страницу тикета в UseDesk
+     *
      * @param int $ticketId
      * @param string $ttnNumber
-     * @return bool|string
+     *
+     * @return void
      */
     public static function postCommentToUsedesk(int $ticketId, string $ttnNumber): void
     {
