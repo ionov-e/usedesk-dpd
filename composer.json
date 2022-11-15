@@ -5,7 +5,8 @@
     "vlucas/phpdotenv": "*",
     "ext-iconv": "*",
     "ext-ftp": "*",
-    "hflabs/dadata": "^22.3"
+    "hflabs/dadata": "^22.3",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {

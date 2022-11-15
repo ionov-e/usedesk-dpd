@@ -126,6 +126,7 @@ class DpdOrder
                 return $ttnArray;
             case ORDER_OK:
                 Log::info(Log::UD_BLOCK, $logMessage);
+                UsedeskBlock::postCommentToUsedesk($ticketId, $return->orderNum);
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
             case ORDER_PENDING:
             case ORDER_DUPLICATE:

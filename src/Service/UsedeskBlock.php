@@ -81,6 +81,50 @@ class UsedeskBlock
     }
 
     /**
+     * @param int $ticketId
+     * @param string $ttnNumber
+     * @return bool|string
+     */
+    public static function postCommentToUsedesk(int $ticketId, string $ttnNumber): void
+    {
+        Log::debug(Log::UD_BLOCK, "Отправка комментария в UseDesk для тикета: $ticketId. ТТН №$ttnNumber");
+
+        try {
+            $data = array(
+                'message' => "Успешно создан в DPD ТТН с номером: $ttnNumber",
+                'user_id' => '169500',
+                'from' => 'user',
+                'ticket_id' => $ticketId,
+                'type' => 'public',
+                'api_token' => USEDESK_API_KEY,
+            );
+            $curl = curl_init();
+
+            curl_setopt($curl, CURLOPT_URL, 'https://api.usedesk.ru/create/comment');
+            curl_setopt($curl, CURLOPT_USERAGENT, 'PHP-MCAPI/2.0');
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+
+            $result = curl_exec($curl);
+
+            $decoded = json_decode($result, true);
+
+            if (empty($decoded['status']) || $decoded['status'] !== 'success') {
+                Log::error(Log::UD_BLOCK, "Ошибка: Получили в ответ: " . json_encode($result, JSON_UNESCAPED_UNICODE));
+            } else {
+                Log::info(Log::UD_BLOCK, "Отправлен комментарий в UseDesk для тикета: $ticketId");
+            }
+
+        } catch (\Exception $e) {
+            Log::error(Log::UD_BLOCK, "Exception при отправки комментария в UseDesk: " . json_encode($result, JSON_UNESCAPED_UNICODE));
+        }
+    }
+
+    /**
      * Возвращает значение статуса выполнения заказа в понятном виде
      *
      * @param string $lastState
