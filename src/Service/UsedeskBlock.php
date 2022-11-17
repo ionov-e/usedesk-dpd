@@ -98,7 +98,7 @@ class UsedeskBlock
                 'user_id' => '169500',
                 'from' => 'user',
                 'ticket_id' => $ticketId,
-                'type' => 'public',
+                'type' => 'private',
                 'api_token' => USEDESK_API_KEY,
             );
             $curl = curl_init();
