@@ -47,7 +47,7 @@ class UseDeskHandler
             $ticketId = $_GET[TICKET_ID_KEY_NAME];
             $internalId = trim($_GET[INTERNAL_KEY_NAME]);
             DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, null, Log::UD_ADD_TTN);
-            header(sprintf("Location: https://www.dpd.ru/return.do2?1002029585$%s", $internalId));
+            header(sprintf("Location: https://www.dpd.ru/return.do2?1002036098$%s", $internalId));
         } catch (\Exception $e) {
             Log::error(Log::UD_ADD_TTN, "Exception: " . $e->getMessage());
         }

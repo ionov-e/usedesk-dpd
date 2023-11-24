@@ -4,12 +4,10 @@
  *
  * @var $args array Аргументы извне
  * */ ?>
-<?php foreach ($args[BLOCKS] as $block):?>
-    <?php if ($args[ALERT_TEXT_KEY_NAME]) : // Если есть что сообщить пользователю ?>
-        <div id="dpd-alert" class="alert alert-warning" role="alert"><?= $block ?></div>
-    <?php endif; ?>
-<?php endforeach;?>
 
+<?php if ($args[ALERT_TEXT_KEY_NAME]) : // Если есть что сообщить пользователю ?>
+    <div id="dpd-alert" class="alert alert-warning" role="alert"><?= $args[ALERT_TEXT_KEY_NAME] ?></div>
+<?php endif; ?>
 
 <?php if (!RETURN_ORDER_MODE) : // Это для режима обычного заказа?>
     <div>
