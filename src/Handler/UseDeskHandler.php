@@ -43,7 +43,7 @@ class UseDeskHandler
         Log::info(Log::UD_ADD_TTN, "Старт");
 
         try {
-            Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_GET), JSON_UNESCAPED_UNICODE);
+            Log::error(Log::UD_ADD_TTN, "Было прислано: " . json_encode($_GET, JSON_UNESCAPED_UNICODE));
             $ticketId = $_GET[TICKET_ID_KEY_NAME];
             $internalId = trim($_GET[INTERNAL_KEY_NAME]);
             DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, null, Log::UD_ADD_TTN);
@@ -96,8 +96,9 @@ class UseDeskHandler
         try {
             $error = false;
             $ticketId = $_GET[DELETE_TICKET_ID_KEY_NAME];
+            $internalNumber = $_GET[INTERNAL_KEY_NAME];
             $dataArrays = DB::getDbAsArray(Log::UD_DEL_TTN);
-            if (!DB::changeTicketState($dataArrays, $ticketId, ORDER_DELETED, Log::UD_DEL_TTN)) {
+            if (!DB::changeTicketState($dataArrays, $ticketId, $internalNumber, ORDER_DELETED, Log::UD_DEL_TTN)) {
                 Log::warning(Log::UD_DEL_TTN, "Не был найден тикет: $ticketId");
                 $error = true;
             }

@@ -14,6 +14,7 @@ define('CLIENT_NUMBER', $_ENV['CLIENT_NUMBER']);
 define('CLIENT_KEY', $_ENV['CLIENT_KEY']);
 define('URL_SCRIPT_ROOT', $_ENV['URL_SCRIPT_ROOT']);
 define('DADATA_API_KEY', $_ENV['DADATA_API_KEY']);
+define('USEDESK_API_KEY', $_ENV['USEDESK_API_KEY']);
 define('URL_DPD_DOMAIN', $_ENV['URL_DPD_DOMAIN']);
 define('FTP_SERVER', $_ENV['FTP_SERVER']);
 define('FTP_USER', $_ENV['FTP_USER']);
@@ -38,8 +39,7 @@ const DATE_KEY_NAME = 'date';                                       // Под т
 const TICKET_ID_KEY_NAME = 'ticket_id';                             // Название параметра в Post-запросе от UseDesk
 const CITY_SEARCH_KEY_NAME = "city_search";                         // Название параметра в Get-запросе из формы при вводе в поле город
 const DELETE_TICKET_ID_KEY_NAME = 'delete_ticket_id';               // Название параметра в Post-запросе для удаления из БД тикета с ТТН
-const ALERT_TEXT_KEY_NAME = 'alert_text';                           // Произвольное название переменной (для избежания опечатки)
-const BLOCKS = 'alert_text';                                        // блоки для вывода в ответе для usedesk
+const STATE_READABLE_KEY_NAME = 'state_readable';                   // Под таким ключом передаю во вьюшку читаемый статус
 
 // Статусы создания заказа регламентированные в документации DPD
 const ORDER_OK = 'OK';                              // Статус заказа (от DPD): OK

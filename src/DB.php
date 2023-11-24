@@ -49,10 +49,17 @@ class DB
                 }
             }
         } else { // Если БД существует - перезаписываем прошлое значение (если существует). Но сохраняем прошлую дату создания
-            if (!empty($dataArrays[$ticketId][DATE_KEY_NAME])) {
-                $date = $dataArrays[$ticketId][DATE_KEY_NAME];
+            if (!empty($dataArrays[$ticketId])) {
+                foreach ($dataArrays[$ticketId] as $key => $singleTtn) {
+                    if ($singleTtn[INTERNAL_KEY_NAME] === $internal) {
+                        if (!empty($singleTtn[DATE_KEY_NAME])) {
+                            $date = $singleTtn[DATE_KEY_NAME];
+                        }
+                        unset($dataArrays[$ticketId][$key]);
+                        $dataArrays[$ticketId] = array_values($dataArrays[$ticketId]);
+                    }
+                }
             }
-            unset($dataArrays[$ticketId]);
         }
 
         // Добавляем вносимое значение
@@ -67,7 +74,7 @@ class DB
             $newArray[LAST_KEY_NAME] = $last;
         }
 
-        $dataArrays[$ticketId] = $newArray;
+        $dataArrays[$ticketId][] = $newArray; #TODO sorting by date
 
         if (self::overwriteDb($dataArrays, $logCategory)) { // Перезаписываем нашу БД
             Log::info($logCategory, "Добавили в БД запись (ID Тикета - $ticketId): " .
@@ -104,7 +111,7 @@ class DB
      *
      * @throws \Exception
      */
-    public static function getTtnArray(int $ticketId, string $logCategory = Log::UD_BLOCK): array
+    public static function getTicketArray(int $ticketId, string $logCategory = Log::UD_BLOCK): array
     {
 
         $dataArrays = self::getDbAsArray($logCategory);
@@ -153,17 +160,22 @@ class DB
      *
      * @param array $dataArrays
      * @param string $ticketId
+     * @param string $internalNumber
      * @param string $newState
      * @param string $logCategory
      *
      * @return bool
      */
-    public static function changeTicketState(array &$dataArrays, string $ticketId, string $newState, string $logCategory = Log::DPD_ORDER): bool
+    public static function changeTicketState(array &$dataArrays, string $ticketId, string $internalNumber, string $newState, string $logCategory = Log::DPD_ORDER): bool
     {
         if (!empty($dataArrays[$ticketId])) {
-            Log::info($logCategory, "В тикете $ticketId в БД меняем статус создания заказа '{$dataArrays[$ticketId][STATE_KEY_NAME]}' на '$newState'");
-            $dataArrays[$ticketId][STATE_KEY_NAME] = $newState;
-            return true;
+            foreach ($dataArrays[$ticketId] as $key => $singleTtn) {
+                if ($singleTtn[INTERNAL_KEY_NAME] == $internalNumber) {
+                    Log::info($logCategory, "В тикете $ticketId в БД для внутр номера DPD: $internalNumber меняем статус создания заказа '{$dataArrays[$ticketId][$key][STATE_KEY_NAME]}' на '$newState'");
+                    $dataArrays[$ticketId][$key][STATE_KEY_NAME] = $newState;
+                    return true;
+                }
+            }
         }
         return false;
     }

@@ -126,6 +126,7 @@ class DpdOrder
                 return $ttnArray;
             case ORDER_OK:
                 Log::info(Log::UD_BLOCK, $logMessage);
+                UsedeskBlock::postCommentToUsedesk($ticketId, $return->orderNum);
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, $return->orderNum, $lastProcessState, Log::UD_BLOCK);
             case ORDER_PENDING:
             case ORDER_DUPLICATE:
@@ -160,14 +161,10 @@ class DpdOrder
         }
     }
 
-    /** Выполняется апдейт статусов выполнения заказов.
-     * Служит, чтобы предотвратить возможную ситуацию хранения более 90 дней не последнего статуса выполнения заказа
-     * без проверки с сервером DPD.
-     * Объяснение: Ведь без этого исполняемого скрипта получение статуса выполнения заказа от DPD происходит только при
-     * каждом переходе на страницу тикета\заявки в UseDesk. А срок хранения статуса на сервере DPD 90 дней. Т.е. если
-     * пользователь задет на страницу тикета в UseDesk и получит не последний статус выполнения заказа. А в следующий раз
-     * зайдет на страницу тикета, к примеру, через 120 дней - он увидит последний полученный статус из БД. Ведь от сервера
-     * уже статус никакой не получит.
+    /**
+     * Обновляет статусы выполнения заказов DPD
+     *
+     * @return void
      */
     public static function updateProcessStates(): void
     {
