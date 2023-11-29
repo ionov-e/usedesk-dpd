@@ -4,7 +4,6 @@
  */
 
 use App\Handler\UseDeskHandler;
-use App\Log;
 use App\Service\DpdCityList;
 
 require_once "../vendor/autoload.php";
