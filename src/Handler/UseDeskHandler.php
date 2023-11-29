@@ -6,14 +6,12 @@ use App\DB;
 use App\Log;
 use App\Service\DpdOrder;
 use App\Service\UsedeskBlock;
+use Exception;
 
 class UseDeskHandler
 {
-
     /**
      * Возвращает HTML содержимое для отображения в UseDesk-е на страницах тикета (при включенном блоке)
-     *
-     * @return void
      */
     public static function generateUsedeskBlockHtml(): void
     {
@@ -24,7 +22,7 @@ class UseDeskHandler
             $ticketId = UsedeskBlock::getTicketIdFromPostJson();
             $htmlString = UsedeskBlock::getBlockHtml($ticketId);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
             $htmlString = 'Произошла ошибка';
         }
@@ -35,8 +33,6 @@ class UseDeskHandler
 
     /**
      * Добавляет в БД присланный внутренний номер заказа для возврата в DPD
-     *
-     * @return void
      */
     public static function addCreatedReturnOrder(): void
     {
@@ -48,22 +44,20 @@ class UseDeskHandler
             $internalId = trim($_GET[INTERNAL_KEY_NAME]);
             DB::saveTicketToDb($ticketId, $internalId, ORDER_UNCHECKED, null, null, Log::UD_ADD_TTN);
             header(sprintf("Location: https://www.dpd.ru/return.do2?1002036098$%s", $internalId));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::UD_ADD_TTN, "Exception: " . $e->getMessage());
         }
     }
 
     /**
      * Создает ТТН в DPD используя данные из заполненной формы
-     *
-     * @return void
      */
     public static function createDpdOrder(): void
     {
         Log::info(Log::DPD_ORDER, "Старт");
         try {
             DpdOrder::createOrder();
-        } catch (\Exception $e) { // Можно конечно отдельно обрабатывать SoapFault исключения
+        } catch (Exception $e) { // Можно конечно отдельно обрабатывать SoapFault исключения
             Log::error(Log::DPD_ORDER, "Попытались создать ТТН. Получили Exception: " . $e->getMessage());
             echo "Произошла ошибка";
         }
@@ -71,8 +65,6 @@ class UseDeskHandler
 
     /**
      * Выводит форму для создания заказа на отправку в DPD
-     *
-     * @return void
      */
     public static function generateFormForOrder(): void
     {
@@ -87,8 +79,6 @@ class UseDeskHandler
 
     /**
      * Удаляет присланный тикет из БД
-     *
-     * @return void
      */
     public static function deleteFromDb(): void
     {
@@ -108,7 +98,7 @@ class UseDeskHandler
                 echo "Успешно отвязана заказ DPD от заявки. Можете закрыть эту страницу"; #TODO Удалить после SSL
                 return;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $exceptionMsg = $e->getMessage();
         }
 
@@ -123,8 +113,6 @@ class UseDeskHandler
 
     /**
      * Выводит сообщение при запросе GET без необходимых параметров
-     *
-     * @return void
      */
     public static function generateNothing(): void
     {

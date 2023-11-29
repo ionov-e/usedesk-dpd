@@ -7,25 +7,25 @@
 namespace App\Service;
 
 use App\Log;
+use Dadata\DadataClient;
+use Exception;
 
 class DpdCityList
 {
-
-
-    const MAX_CITY_COUNT_TO_RETURN = 15;  // Максимальное количество подходящих городов для возврата в форму создания ТТН
-    //Для Dadata можно установить максимальное количество от 5 до 20
-
-    const LIST_FOLDER_NEW = DATA_FOLDER_ROOT . '/dpd-cities/';
+    /** @var int Максимальное количество подходящих городов для возврата в форму создания ТТН
+     * Для Dadata можно установить максимальное количество от 5 до 20 */
+    const MAX_CITY_COUNT_TO_RETURN = 15;
+    const LIST_FOLDER_NEW = PATH_DATA_FOLDER_ROOT . '/dpd-cities/';
     // Пути к JSON-файлам со списком городов
     const CITY_LIST_IDS_PATH_NEW = self::LIST_FOLDER_NEW . 'city-list-ids.json';       // Ключами выступают - ID нас. пункта
     const CITY_LIST_CITIES_PATH_NEW = self::LIST_FOLDER_NEW . 'city-list-cities.json'; // Ключами выступают - Название нас. пункта
 
-    const LIST_FOLDER_SAFE = DATA_FOLDER_ROOT . '/dpd-cities-ready/';
+    const LIST_FOLDER_SAFE = PATH_DATA_FOLDER_ROOT . '/dpd-cities-ready/';
     // Пути к JSON-файлам со списком городов
     const CITY_LIST_IDS_PATH_SAFE = self::LIST_FOLDER_SAFE . 'city-list-ids.json';       // Ключами выступают - ID нас. пункта
     const CITY_LIST_CITIES_PATH_SAFE = self::LIST_FOLDER_SAFE . 'city-list-cities.json'; // Ключами выступают - Название нас. пункта
 
-    // ФТП-соединение с DPD (файл с городами)
+    /** @var string ФТП-соединение с DPD (файл с городами) */
     const FTP_FILENAME_PART = 'GeographyDPD';
 
     const CITY_LIST_ORIGINAL_PATH = self::LIST_FOLDER_NEW . self::FTP_FILENAME_PART . '.csv';
@@ -33,8 +33,6 @@ class DpdCityList
 
     /**
      * Возвращает Json с городами, удовлетворяющими поисковому запросу
-     *
-     * @return void
      */
     public static function searchCitiesJson(): void
     {
@@ -50,15 +48,13 @@ class DpdCityList
                 $returnArray = self::searchCitiesArrayInDpdList($cityIds);
                 echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
         }
     }
 
     /**
      * Обновляет список со всеми городами доступными для доставки курьером
-     *
-     * @return void
      */
     public static function updateDpdCityList(): void
     {
@@ -68,28 +64,25 @@ class DpdCityList
             self::downloadCsvFromDpdFtp();
             $jsons = self::csvToJson(self::CITY_LIST_ORIGINAL_PATH);
             self::saveJsons($jsons);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::DPD_CITY_UPD, "Exception: " . $e->getMessage());
         }
     }
 
     /**
      * Выкачивает файл с фтп с заменой уже скачанного
-     *
-     * @return void
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     private static function downloadCsvFromDpdFtp(): void
     {
         $ftp = ftp_connect(FTP_SERVER); // установка соединения
 
         if (!$ftp) {
-            throw new \Exception("FTP ошибка: Не Удалось подсоединиться к серверу");
+            throw new Exception("FTP ошибка: Не Удалось подсоединиться к серверу");
         }
 
         if (!ftp_login($ftp, FTP_USER, FTP_PASSWORD)) {
-            throw new \Exception("FTP ошибка: Неверный логин / пароль");
+            throw new Exception("FTP ошибка: Неверный логин / пароль");
         }
 
         ftp_pasv($ftp, true);
@@ -98,7 +91,7 @@ class DpdCityList
         $remoteFolder = 'integration'; // В документации от DPD сказано об этой папке. Сама в руте, а в ней искомый CSV
 
         if (!$listOfFilesOnServer = ftp_nlist($ftp, $remoteFolder)) {
-            throw new \Exception("FTP ошибка: Не получилось получить список файлов");
+            throw new Exception("FTP ошибка: Не получилось получить список файлов");
         }
 
         $remoteFilename = ""; // Сюда запишем название файла для скачивания
@@ -111,7 +104,7 @@ class DpdCityList
         }
 
         if (empty($remoteFilename)) {
-            throw new \Exception("На FTP не было найдено файла с упоминанием " . self::FTP_FILENAME_PART .
+            throw new Exception("На FTP не было найдено файла с упоминанием " . self::FTP_FILENAME_PART .
                 " среди: " . implode(", ", $listOfFilesOnServer));
         }
 
@@ -125,7 +118,7 @@ class DpdCityList
         }
 
         if (!ftp_get($ftp, self::CITY_LIST_ORIGINAL_PATH, $remoteFilename, FTP_ASCII)) {
-            throw new \Exception("FTP ошибка: Не удалось скачать существующий файл: $remoteFilename");
+            throw new Exception("FTP ошибка: Не удалось скачать существующий файл: $remoteFilename");
         }
 
         ftp_close($ftp);
@@ -135,11 +128,8 @@ class DpdCityList
 
     /**
      * Возвращает 2 JSON строки с распарсенными данными из CSV
-     *
      * @param string $csvPath Путь к файлу с городами
-     *
-     * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private static function csvToJson(string $csvPath): array
     {
@@ -208,10 +198,6 @@ class DpdCityList
 
     /**
      * Сохраняет полученные массивы с городами
-     *
-     * @param array $jsons
-     *
-     * @return void
      */
     private static function saveJsons(array $jsons): void
     {
@@ -241,11 +227,7 @@ class DpdCityList
 
     /**
      * Возвращает массив с ID городов удовлетворяющих поисковом запросу
-     *
      * Например: в параметре получили "Мос". Метод вернет ID нас.пунктов начинающихся на эти буквы "Мос"
-     *
-     * @param string $query
-     *
      * @return array Например: [100, 101234, ...
      */
     private static function searchCitiesIdsInDpdList(string $query): array
@@ -290,12 +272,7 @@ class DpdCityList
 
     /**
      * Возвращает массив из нашего списка городов, но лишь тех городов, чьи ID переданы в параметре
-     *
      * Выйдет массив каждый элемент которого одномерный массив с 3 элементами: abbreviation - 2 (г), city - 3 (Ялта), region - 4 (Респ Крым)
-     *
-     * @param array $cityIds
-     *
-     * @return array
      */
     private static function searchCitiesArrayInDpdList(array $cityIds): array
     {
@@ -325,16 +302,12 @@ class DpdCityList
 
     /**
      * Возврат массива с населенными пунктами, удовлетворяющими поисковому запросу используя сервис Dadata
-     *
-     * @param string $query
-     *
-     * @return array
      */
     private static function searchInDadata(string $query): array
     {
         Log::debug(Log::DPD_CITY_FIND, "Поиск в Dadata: $query");
 
-        $dadataObject = new \Dadata\DadataClient(DADATA_API_KEY, null);
+        $dadataObject = new DadataClient(DADATA_API_KEY, null);
 
         if (CITY_LIST_SEARCH_MODE === 0) { // Поиск вплоть до дома/квартиры
             $fields = array(

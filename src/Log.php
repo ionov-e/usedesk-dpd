@@ -1,10 +1,6 @@
 <?php
 
 namespace App;
-
-/**
- * Логгер (синглтон)
- */
 class Log
 {
     // Категории логирования
@@ -24,11 +20,6 @@ class Log
     {
     }
 
-    /**
-     * Возвращает объект класса Log (синглтон)
-     *
-     * @return Log
-     */
     public static function getLogger(): Log
     {
         if (self::$instance == null) {
@@ -46,7 +37,7 @@ class Log
 
     public static function info(string $category, string $message): void
     {
-        if (LOG_MIN_LEVEL <= 1 ) {
+        if (LOG_MIN_LEVEL <= 1) {
             self::getLogger()->logMsg('info', $category, $message);
         }
     }
@@ -72,19 +63,14 @@ class Log
 
     /**
      * Добавление строки в лог
-     *
      * @param string $level Уровень (Например: info)
      * @param string $category Категория (Например: ftp)
      * @param string $message Строка для логирования
-     *
-     * @return void
      */
     private function logMsg(string $level, string $category, string $message): void
     {
-        $logFolder = LOG_FOLDER_ROOT . DIRECTORY_SEPARATOR . date('Y') . DIRECTORY_SEPARATOR . date('m');
+        $logFolder = PATH_LOG_FOLDER_ROOT . DIRECTORY_SEPARATOR . date('Y') . DIRECTORY_SEPARATOR . date('m');
 
-        // Проверяет создана ли соответствующая папка. Создает, если не существует
-        // Можно было бы вынести проверку коренной папке при инициализации, а другие нет - может пройти месяц, год (в новые папке сохранять)
         if (!is_dir($logFolder)) {
             mkdir($logFolder, 0770, true);
         }

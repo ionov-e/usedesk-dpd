@@ -1,26 +1,25 @@
 <?php
 
-/**
- *  Класс для создания ТТН в DPD
- */
-
 namespace App\Service;
 
 use App\DB;
 use App\Log;
+use DateTime;
+use Exception;
+use SoapClient;
+use SoapFault;
 
+/**
+ *  Класс для создания ТТН в DPD
+ */
 class DpdOrder
 {
-
     const URL_ORDER = URL_DPD_DOMAIN . "services/order2?wsdl";
     const URL_TRACING = URL_DPD_DOMAIN . "services/tracing1-1?wsdl";
 
     /**
      * Создание заказа на отправку в DPD
-     *
-     * @return void
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function createOrder(): void
     {
@@ -31,7 +30,7 @@ class DpdOrder
         $arRequest = self::getDataToSendToCreateOrder($form);
 
         // IDE не подсказывает, но Soap может кидать SoapFault исключения
-        $client = new \SoapClient (self::URL_ORDER);
+        $client = new SoapClient (self::URL_ORDER);
         $responseStd = $client->createOrder($arRequest); //делаем запрос в DPD, получаем StdClass
         $return = $responseStd->return;
 
@@ -62,15 +61,8 @@ class DpdOrder
 
     /**
      * Возвращает массив тикета из ответа статус-чека заказа в DPD. Перезаписывает в БД при изменении статуса
-     *
      * Если статус не изменился - в итоге вернет точно такой же массив как и переданный в параметре
-     *
-     * @param string $ticketId
-     * @param array $ttnArray
-     *
-     * @return array
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function checkOrder(string $ticketId, array $ttnArray): array
     {
@@ -84,7 +76,7 @@ class DpdOrder
         Log::debug(Log::UD_BLOCK, "Запрос на чек создания статуса посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
         // IDE не подсказывает, но Soap может кидать SoapFault исключения
-        $client = new \SoapClient (self::URL_ORDER);
+        $client = new SoapClient (self::URL_ORDER);
         $responseStd = $client->getOrderStatus($arRequest); //делаем запрос в DPD
 
         Log::debug(Log::UD_BLOCK, "Ответ на чек создания статуса посылки: " . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
@@ -112,7 +104,7 @@ class DpdOrder
         switch ($return->status) {
             case ORDER_NOT_FOUND:
                 Log::info(Log::UD_BLOCK, $logMessage);
-                if ((new \DateTime($ttnArray[DATE_KEY_NAME]))->modify("+1 day")->getTimestamp() < time()) {
+                if ((new DateTime($ttnArray[DATE_KEY_NAME]))->modify("+1 day")->getTimestamp() < time()) {
                     return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, ORDER_WRONG, null, null, Log::UD_BLOCK);
                 }
                 return DB::saveTicketToDb($ticketId, $return->orderNumberInternal, $return->status, null, null, Log::UD_BLOCK);
@@ -163,8 +155,6 @@ class DpdOrder
 
     /**
      * Обновляет статусы выполнения заказов DPD
-     *
-     * @return void
      */
     public static function updateProcessStates(): void
     {
@@ -197,7 +187,7 @@ class DpdOrder
                 }
 
                 // Не будем проверять новый статус выполнения, если с последней записи в БД > 90 дней
-                if ((new \DateTime($ttnArray[DATE_KEY_NAME]))->modify("+90 day")->getTimestamp() < time()) {
+                if ((new DateTime($ttnArray[DATE_KEY_NAME]))->modify("+90 day")->getTimestamp() < time()) {
                     $countTooOld++;
                     continue;
                 }
@@ -221,7 +211,7 @@ class DpdOrder
 
             Log::info(Log::CRON_LAST_UPDATE, "Обновили тикетов: $countUpdated/$countTotal. Пропущено: 'несозданных' $countNotCreated, 'готовых' $countDoneBefore, 'старых' $countTooOld, 'пустых' $countEmpty, 'таких же' $countSame");
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::CRON_LAST_UPDATE, "Exception: " . $e->getMessage());
         }
     }
@@ -229,11 +219,6 @@ class DpdOrder
 
     /**
      * Возвращает последний статус выполнения посылки. Если не получили - возвращает пустую строку
-     *
-     * @param string $ttnNumber
-     * @param string $logCategory
-     *
-     * @return string
      */
     public static function getLastProcessState(string $ttnNumber, string $logCategory = Log::UD_BLOCK): string
     {
@@ -247,7 +232,7 @@ class DpdOrder
             Log::debug($logCategory, "Запрос на чек статуса выполнения посылки: " . json_encode($arRequest, JSON_UNESCAPED_UNICODE));
 
             // IDE не подсказывает, но Soap может кидать SoapFault исключения
-            $client = new \SoapClient (self::URL_TRACING);
+            $client = new SoapClient (self::URL_TRACING);
             $responseStd = $client->getStatesByDPDOrder($arRequest); //делаем запрос в DPD
             Log::debug($logCategory, "Ответ на чек статуса выполнения посылки:" . json_encode($responseStd, JSON_UNESCAPED_UNICODE));
 
@@ -285,15 +270,16 @@ class DpdOrder
 
             return $lastNewState;
 
-        } catch (\SoapFault $e) {
+        } catch (SoapFault $e) {
             if ($e->getMessage() == "Данные не найдены" || $e->getMessage() == "Посылки еще не поступили либо дата заказа ранее подключения клиента к сервису") {
                 Log::debug($logCategory, "$ttnNumber на сервере DPD не обнаружен");
             } else {
                 Log::error($logCategory, "SoapFault:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($logCategory, "Exception:" . json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
         }
+
         return '';
     }
 
@@ -326,10 +312,6 @@ class DpdOrder
 
     /**
      * Возвращает массив с данными для отправки на сервер DPD для создания заказа
-     *
-     * @param array $form
-     *
-     * @return array
      */
     private static function getDataToSendToCreateOrder(array $form): array
     {
@@ -378,7 +360,6 @@ class DpdOrder
         if (!empty($form['senderAddress']['index'])) {
             $arData['header']['senderAddress']['index'] = $form['senderAddress']['index'];// Почтовый индекс
         }
-
 
         $arData['order'] = array(
             'orderNumberInternal' => $form['orderNumberInternal'],
@@ -439,15 +420,12 @@ class DpdOrder
 
     /**
      * Возвращает массив с данными авторизации для SOAP
-     *
-     * @return array
      */
-    private static function getAuthArray()
+    private static function getAuthArray(): array
     {
         return array(
             'clientNumber' => CLIENT_NUMBER,
             'clientKey' => CLIENT_KEY
         );
     }
-
 }

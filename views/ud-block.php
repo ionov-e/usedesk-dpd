@@ -82,7 +82,7 @@ $ticketArray = $args[$ticketId];
                     </div>
                     <?php if (!in_array($ttnArray[LAST_KEY_NAME], [LAST_DELIVERED]) && !in_array($ttnArray[STATE_KEY_NAME], [ORDER_DELETED])) : // Если не пустое содержимое последнего статуса?>
                         <a class='btn btn-red' target="_blank"
-                           href='<?= URL_SCRIPT_PHP ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>&<?= INTERNAL_KEY_NAME ?>=<?= $ttnArray[INTERNAL_KEY_NAME] ?>'
+                           href='<?= URL_TO_INDEX_USEDESK ?>?<?= DELETE_TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>&<?= INTERNAL_KEY_NAME ?>=<?= $ttnArray[INTERNAL_KEY_NAME] ?>'
                            onclick="document.querySelector('#dpd-default-dynamic').style.display = 'none';document.querySelector('#dpd-after').style.display = 'block'">Отвязать
                             заказ от заявки</a>
                     <?php endif; ?>
@@ -108,10 +108,10 @@ $ticketArray = $args[$ticketId];
 <?php if (!RETURN_ORDER_MODE) : // Это для режима обычного заказа?>
     <div>
         <a class='btn btn-green' target=”_blank”
-           href='<?= URL_SCRIPT_PHP ?>?<?= TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>'>Оформить ТТН</a>
+           href='<?= URL_TO_INDEX_USEDESK ?>?<?= TICKET_ID_KEY_NAME ?>=<?= $ticketId ?>'>Оформить ТТН</a>
     </div>
 <?php else : // Это для режима возврата ?>
-    <form id="dpd-form" method="get" action="<?= URL_SCRIPT_PHP ?>" target="_blank">
+    <form id="dpd-form" method="get" action="<?= URL_TO_INDEX_USEDESK ?>" target="_blank">
         <div class="form-group">
             <label class="form-label">Внутренний номер посылки (разрешены латиница, цифры и дефис)</label>
             <input oninput="this.value=this.value.replace(/[^A-Za-z0-9-\s]/g,'');" name="<?= INTERNAL_KEY_NAME ?>"

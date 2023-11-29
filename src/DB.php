@@ -1,4 +1,9 @@
 <?php
+
+namespace App;
+
+use Exception;
+
 /**
  * Класс для работы с БД
  *
@@ -11,29 +16,14 @@
  * last - полученный статус выполнения ТТН от DPD (если получили)
  * ttn - номер ТТН от DPD (если получили)
  * date - дата создания записи
- *
  */
-
-namespace App;
-
 class DB
 {
-
     /**
      * Вносит запись в БД. Возвращает внесенные данные (без ticket ID)
-     *
-     * @param string $ticketId
-     * @param string $internal
-     * @param string $statusDPD
-     * @param string|null $ttn
-     * @param string|null $last
-     * @param string $logCategory
-     *
-     * @return array
-     *
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, string $ttn = null, string $last = null, string $logCategory = Log::DPD_ORDER): array
+    public static function saveTicketToDb(string $ticketId, string $internal, string $statusDPD, ?string $ttn = null, ?string $last = null, string $logCategory = Log::DPD_ORDER): array
     {
 
         $dataArrays = self::getDbAsArray($logCategory);
@@ -42,10 +32,10 @@ class DB
             Log::warning($logCategory, "Первая запись в БД");
 
             // Проверяет создана ли соответствующая папка. Создает, если не существует
-            if (!is_dir(DATA_FOLDER_ROOT)) {
-                if (!mkdir(DATA_FOLDER_ROOT, 0770, true)) {
+            if (!is_dir(PATH_DATA_FOLDER_ROOT)) {
+                if (!mkdir(PATH_DATA_FOLDER_ROOT, 0770, true)) {
                     Log::critical($logCategory, "Не получилось создать папку для БД");
-                    throw new \Exception("Возникла ошибка");
+                    throw new Exception("Возникла ошибка");
                 }
             }
         } else { // Если БД существует - перезаписываем прошлое значение (если существует). Но сохраняем прошлую дату создания
@@ -86,15 +76,10 @@ class DB
 
     /**
      * Перезаписываем БД содержимым массива из параметра
-     *
-     * @param array $dataArrays
-     * @param string $logCategory
-     *
-     * @return bool
      */
     public static function overwriteDb(array $dataArrays, string $logCategory = Log::DPD_ORDER): bool
     {
-        if (!file_put_contents(DATA_JSON, json_encode($dataArrays, JSON_UNESCAPED_UNICODE))) {
+        if (!file_put_contents(PATH_DATA_JSON, json_encode($dataArrays, JSON_UNESCAPED_UNICODE))) {
             Log::critical($logCategory, "Не получилось обновить БД");
             return false;
         }
@@ -103,13 +88,7 @@ class DB
 
     /**
      * Возвращает массив из БД для тикета UseDesk. Или пустой массив, если не было такого тикета
-     *
-     * @param int $ticketId
-     * @param string $logCategory
-     *
-     * @return array
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getTicketArray(int $ticketId, string $logCategory = Log::UD_BLOCK): array
     {
@@ -131,25 +110,20 @@ class DB
 
     /**
      * Возвращает содержимое БД в виде массива
-     *
-     * @param string $logCategory
-     *
-     * @return array
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getDbAsArray(string $logCategory = Log::DPD_ORDER): array
     {
-        if (!file_exists(DATA_JSON)) { // Если БД еще не существует
+        if (!file_exists(PATH_DATA_JSON)) { // Если БД еще не существует
             Log::warning($logCategory, "БД еще не существует");
             return [];
         }
 
-        $dataArrays = json_decode(file_get_contents(DATA_JSON), true);
+        $dataArrays = json_decode(file_get_contents(PATH_DATA_JSON), true);
 
         if (is_null($dataArrays)) {
             Log::critical($logCategory, "Не получилось декодировать БД. Ошибка: " . json_last_error());
-            throw new \Exception("Возникла ошибка");
+            throw new Exception("Возникла ошибка");
         }
 
         return $dataArrays;
@@ -157,14 +131,6 @@ class DB
 
     /**
      * Меняет в массиве "БД" (первый параметр) статус создания заказа в указанном тикете и возвращает true, если тикет был найден внутри
-     *
-     * @param array $dataArrays
-     * @param string $ticketId
-     * @param string $internalNumber
-     * @param string $newState
-     * @param string $logCategory
-     *
-     * @return bool
      */
     public static function changeTicketState(array &$dataArrays, string $ticketId, string $internalNumber, string $newState, string $logCategory = Log::DPD_ORDER): bool
     {

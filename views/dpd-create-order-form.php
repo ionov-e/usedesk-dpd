@@ -297,7 +297,7 @@ $modifyDays = 1;
                 if (keywordsStr.length < 3) {
                     return;
                 }
-                fetch('<?= INDEX_FILE_USEDESK ?>?<?= CITY_SEARCH_KEY_NAME ?>=' + encodeURI(keywordsStr))
+                fetch('<?= FILENAME_OF_INDEX_USEDESK ?>?<?= CITY_SEARCH_KEY_NAME ?>=' + encodeURI(keywordsStr))
                     .then((response) => response.json())
                     .then((data) => {
 

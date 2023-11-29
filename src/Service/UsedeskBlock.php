@@ -1,24 +1,21 @@
 <?php
 
-/**
- *  Класс для генерирования содержимого блока HTML на странице тикета UseDesk
- */
-
 namespace App\Service;
 
 use App\DB;
 use App\Log;
+use Exception;
 
+/**
+ *  Класс для генерирования содержимого блока HTML на странице тикета UseDesk
+ */
 class UsedeskBlock
 {
     const UD_BLOCK_VIEW_PATH = PROJECT_DIR . '/views/ud-block.php';
 
     /**
      * Возвращает ID Тикета, если находит внутри Post-запроса
-     *
-     * @return int
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getTicketIdFromPostJson(): int
     {
@@ -34,7 +31,7 @@ class UsedeskBlock
                 Log::info(Log::UD_BLOCK, "ID Тикета:" . $ticketId);
                 return $ticketId;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $errorMsg .= $e->getMessage();
         }
 
@@ -44,17 +41,12 @@ class UsedeskBlock
             Log::warning(Log::UD_BLOCK, "Вместо ID тикета Было прислано:" . PHP_EOL . $postJson);
         }
 
-        throw new \Exception($errorMsg);
+        throw new Exception($errorMsg);
     }
 
     /**
      * Возвращает HTML-содержимое блока в интерфейсе UseDesk
-     *
-     * @param int $ticketId
-     *
-     * @return string
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getBlockHtml(int $ticketId): string
     {
@@ -80,11 +72,6 @@ class UsedeskBlock
         return UsedeskBlock::renderPhp(self::UD_BLOCK_VIEW_PATH, [$ticketId => $ticketArray]);
     }
 
-    /**
-     * @param int $ticketId
-     * @param string $ttnNumber
-     * @return bool|string
-     */
     public static function postCommentToUsedesk(int $ticketId, string $ttnNumber): void
     {
         Log::debug(Log::UD_BLOCK, "Отправка комментария в UseDesk для тикета: $ticketId. ТТН №$ttnNumber");
@@ -119,17 +106,13 @@ class UsedeskBlock
                 Log::info(Log::UD_BLOCK, "Отправлен комментарий в UseDesk для тикета: $ticketId");
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception при отправки комментария в UseDesk: " . json_encode($result, JSON_UNESCAPED_UNICODE));
         }
     }
 
     /**
      * Возвращает значение статуса выполнения заказа в понятном виде
-     *
-     * @param string $lastState
-     *
-     * @return string
      */
     private static function getLastStateReadable(string $lastState): string
     {
@@ -188,11 +171,6 @@ class UsedeskBlock
 
     /**
      * Возвращает отрендеренный PHP-файл. Можно в файл передать аргументы
-     *
-     * @param string $path
-     * @param array $args
-     *
-     * @return string
      */
     private static function renderPhp(string $path, array $args = []): string
     {
@@ -200,9 +178,11 @@ class UsedeskBlock
         include($path);
         $var = ob_get_contents();
         ob_end_clean();
+
         if (empty($var)) {
             Log::critical(Log::UD_BLOCK, "Не вышло отрендерить файл: $path с аргументами: " . json_encode($args, JSON_UNESCAPED_UNICODE));
         }
+
         return $var;
     }
 }
