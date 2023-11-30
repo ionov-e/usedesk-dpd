@@ -21,7 +21,6 @@ class UseDeskHandler
         try {
             $ticketId = UsedeskBlock::getTicketIdFromPostJson();
             $htmlString = UsedeskBlock::getBlockHtml($ticketId);
-
         } catch (Exception $e) {
             Log::error(Log::UD_BLOCK, "Exception: " . $e->getMessage());
             $htmlString = 'Произошла ошибка';

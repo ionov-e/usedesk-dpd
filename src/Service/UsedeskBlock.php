@@ -27,10 +27,12 @@ class UsedeskBlock
             $postJson = file_get_contents('php://input');
             $data = json_decode($postJson);
             $ticketId = intval($data->{TICKET_ID_KEY_NAME});
+
             if (!empty($ticketId)) { // Здесь может быть и "0" - нас это тоже не устраивает
                 Log::info(Log::UD_BLOCK, "ID Тикета:" . $ticketId);
                 return $ticketId;
             }
+
         } catch (Exception $e) {
             $errorMsg .= $e->getMessage();
         }
@@ -53,20 +55,18 @@ class UsedeskBlock
         $ticketArray = DB::getTicketArray($ticketId);
 
         foreach ($ticketArray as $key => $singleTtn) {
-
             // Имеет смысл проверять изменения статуса СОЗДАНИЯ заказа только у этих статусов создания (в случае ОК - еще и статус выполнения возвращает):
-            if (in_array($singleTtn[STATE_KEY_NAME], [ORDER_PENDING, ORDER_UNCHECKED, ORDER_NOT_FOUND])
-                || ($singleTtn[STATE_KEY_NAME] === ORDER_OK && !in_array($singleTtn[LAST_KEY_NAME], [LAST_DELIVERED, LAST_LOST, LAST_NEW_ORDER_BY_DPD]))) {
+            if (
+                in_array($singleTtn[STATE_KEY_NAME], [ORDER_PENDING, ORDER_UNCHECKED, ORDER_NOT_FOUND])
+                || ($singleTtn[STATE_KEY_NAME] === ORDER_OK && !in_array($singleTtn[LAST_KEY_NAME], [LAST_DELIVERED, LAST_LOST, LAST_NEW_ORDER_BY_DPD]))
+            ) {
                 $ticketArray[$key] = DpdOrder::checkOrder($ticketId, $singleTtn);
             }
 
             // Превращение статуса выполнения заказа в понятный вид
-            if (!empty($ticketArray[$key][LAST_KEY_NAME])) {
-                $ticketArray[$key][STATE_READABLE_KEY_NAME] = self::getLastStateReadable($ticketArray[$key][LAST_KEY_NAME]);
-            } else { // Если пустой - будет отображать статус создания, а не прогресса доставки
-                $ticketArray[$key][STATE_READABLE_KEY_NAME] = self::getCreationStateReadable($ticketArray[$key][STATE_KEY_NAME]);
-            }
-
+            $ticketArray[$key][STATE_READABLE_KEY_NAME] = (!empty($ticketArray[$key][LAST_KEY_NAME]))
+                ? self::getLastStateReadable($ticketArray[$key][LAST_KEY_NAME])
+                : self::getCreationStateReadable($ticketArray[$key][STATE_KEY_NAME]); // Если пустой - будет отображать статус создания, а не прогресса доставки
         }
 
         return UsedeskBlock::renderPhp(self::UD_BLOCK_VIEW_PATH, [$ticketId => $ticketArray]);

@@ -10,7 +10,7 @@ require_once "../vendor/autoload.php";
 require_once "../config/global.php";
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {     // Get-запросы
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!empty($_GET[CITY_SEARCH_KEY_NAME])) {
         DpdCityList::searchCitiesJson();        // Get-запрос: из "нашей" формы при вводе в поле Город. Возвращаем Json
     } elseif (!empty($_GET[DELETE_TICKET_ID_KEY_NAME])) {
@@ -22,9 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {     // Get-запросы
     } else {
         UseDeskHandler::generateNothing(); // Get-запрос: непредвиденный запрос
     }
-} elseif (!empty($_POST)) { // Post-запрос с содержанием "нашей" формы для оформления обычной доставки DPD
+    exit();
+}
+
+if (!empty($_POST)) { // Post-запрос с содержанием "нашей" формы для оформления обычной доставки DPD
     UseDeskHandler::createDpdOrder();
-} else {                    // Post-запрос (c json) при открытии станицы заявки Usedesk. Ждет ответ: HTML содержимое динамического блока (тоже json)
+} else {             // Post-запрос (c json) при открытии станицы заявки Usedesk. Ждет ответ: HTML содержимое динамического блока (тоже json)
     UseDeskHandler::generateUsedeskBlockHtml();
 }
 exit();
