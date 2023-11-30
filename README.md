@@ -43,6 +43,14 @@
 
 * Сайт будет доступен по адресу: http://localhost:4000/
 
+### Для локального дебага
+
+Эмуляция запроса от UseDesk со страницы случайного тикета (можно curl импортировать в Postman)
+```bash
+curl --location 'http://localhost:4000/usedesk-dpd.php?XDEBUG_SESSION_START=PHPSTORM' \
+--header 'Content-Type: application/json' \
+--data '{"ticket_id": 153341111}'
+```
 
 ## Использование
 
